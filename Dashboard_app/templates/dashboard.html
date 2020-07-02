@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mon premier dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+
+  <body>
+    <h1>Sars-Cov-2 by Country</h1>
+    <h3>Click on a country in the list to plot the data</h3>
+    <div>
+        <form id="selectCountry">
+            <select name="country" id="country">
+              <optgroup id="defaultCountry">
+                <option id="France" value="France" selected>France</option>
+              </optgroup>
+              <optgroup id="countryList">
+                
+              </optgroup>
+            </select>
+        </form>
+    </div>
+
+    <div id="graph" style="width: auto; height: 700px;"></div>
+
+    <!-- on inclut jQuery via CDN -->
+    <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
+    <!-- votre propre fichier dans le dossier de votre projet -->
+    <script src="static/dashboard.js"></script>
+  </body>
+</html>
