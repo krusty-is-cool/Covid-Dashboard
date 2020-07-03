@@ -21,9 +21,12 @@ def covid():
     data = pd.read_csv('data.csv', sep = ',')
     data = data[data["countriesAndTerritories"]==country]
     
+    mvaverage = data.reindex(index=data.index[::-1])
+    mvaverage = np.flip(mvaverage.iloc[:,5].rolling(window=7).mean())
     mvaverage2 = data.reindex(index=data.index[::-1])
     mvaverage2 = np.flip(mvaverage2.iloc[:,4].rolling(window=7).mean())
-    data = pd.concat([data,pd.DataFrame(mvaverage2.values, index = data.index, columns = ["mvavrg"])], axis=1)
+    data = pd.concat([data,pd.DataFrame(mvaverage2.values, index = data.index, columns = ["casesAvrg"])], axis=1)
+    data = pd.concat([data,pd.DataFrame(mvaverage.values, index = data.index, columns = ["deathsAvrg"])], axis=1)
     
     return data.to_json(orient='split')
 

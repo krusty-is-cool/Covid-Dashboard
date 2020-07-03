@@ -1,11 +1,4 @@
-/*
-Requête api/countries pour obtenir la liste des pays disponibles
-modification du champ select id #countryList
-
-puis, requête api/covid avec le pays en paramètre
-afficher le graphique plotly
-*/
-
+//FORM AND TEXT
 $.ajax({
     url: "api/countries",
     success: getCountries
@@ -22,68 +15,111 @@ function getCountries(result){
     };
 };
 
-$('h1').on('mouseover', function(){
-    let $this = $(this);
-    $this.css('color', 'pink');
-});
+//GRAPHS
+let covidData;
 
-$('h1').on('mouseleave', function(){
-    let $this = $(this);
-    $this.css('color', 'black');
-});
+const casesButton = $('#cases-button');
+const deathsButton = $('#deaths-button');
+let choiceButton = casesButton.attr('id');
 
+const country = document.getElementById('country');
+let selectedCountry = country.value;
 
-$('select#country').on('click', 'option', function(){
-    let $this = $(this);
-    let selectedCountry = $this.attr('value');
-
-    $.ajax({
+$.ajax({
     url: "api/covid",
     dataType: "json",
     data: { country: selectedCountry },
     success: plotGraph
-    });
+});
+
+country.addEventListener('input', function(){
+    selectedCountry = country.value;
+    $.ajax({
+        url: "api/covid",
+        dataType: "json",
+        data: { country: selectedCountry },
+        success: plotGraph
+        });
+});
+
+casesButton.on('click', function(){
+    choiceButton = casesButton.attr('id');
+    plotGraph(covidData);
 
 });
 
+deathsButton.on('click', function(){
+    choiceButton = deathsButton.attr('id');
+    plotGraph(covidData);
+})
+
 function jsonDataToArray(covidData){
     let x = [];
-    let y = [];
-    let y2 = [];
+    let yCases = [];
+    let yCasesAvrg = [];
+    let yDeaths = [];
+    let yDeathsAvrg = [];
     for(let i in covidData["data"]){
         x.push(String(covidData["data"][i][3])+"-"+String(covidData["data"][i][2])+"-"+String(covidData["data"][i][1]));
-        y.push(covidData["data"][i][4]);
-        y2.push(covidData["data"][i][11])
+        yCases.push(covidData["data"][i][4]);
+        yCasesAvrg.push(covidData["data"][i][11]);
+        yDeaths.push(covidData["data"][i][5]);
+        yDeathsAvrg.push(covidData["data"][i][12]);
     };
-    console.log([x,y,y2]);
-    return [x,y,y2];
+    return [x, yCases, yCasesAvrg, yDeaths, yDeathsAvrg];
 };
 
 function plotGraph(result){
-    let covidData = result;
+    covidData = result;
     const graph = document.getElementById('graph');
     let mydata = jsonDataToArray(covidData);
     
-    var trace1 = {
-        type: "bar",
-        name: "raw data",
-        x: mydata[0],
-        y: mydata[1]
-    };
+    if (choiceButton == casesButton.attr('id')) {
+        var trace1 = {
+            type: "bar",
+            name: "raw data",
+            x: mydata[0],
+            y: mydata[1]
+        };
 
-    var trace2 = {
-        type: 'scatter',
-        mode: 'lines',
-        name: "7 days moving average",
-        x: mydata[0],
-        y: mydata[2]
-    };
+        var trace2 = {
+            type: 'scatter',
+            mode: 'lines',
+            name: "7 days moving average",
+            x: mydata[0],
+            y: mydata[2]
+        };
+
+        var layout = {
+            title: 'Daily New Cases'
+        };
+
+    } else if (choiceButton == deathsButton.attr('id')) {
+        var trace1 = {
+            type: "bar",
+            name: "raw data",
+            x: mydata[0],
+            y: mydata[3]
+        };
+
+        var trace2 = {
+            type: 'scatter',
+            mode: 'lines',
+            name: "7 days moving average",
+            x: mydata[0],
+            y: mydata[4]
+        };
+
+        var layout = {
+            title: 'Daily New Deaths'
+        };
+
+    } else {
+        alert("Sorry, we are not able to plot any graph.");
+    }
 
     var data = [trace1, trace2];
 
-    var layout = {
-        title: 'Daily New Cases'
-    };
     console.log(data);
     Plotly.newPlot(graph, data, layout);
 };
