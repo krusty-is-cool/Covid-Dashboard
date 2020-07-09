@@ -146,8 +146,9 @@ function plotGraph(){
     }
 
     var data = [trace1, trace2];
+    var config = { responsive: true }
 
     console.log(data);
-    Plotly.newPlot(graph, data, layout);
+    Plotly.newPlot(graph, data, layout, config);
 };
 
