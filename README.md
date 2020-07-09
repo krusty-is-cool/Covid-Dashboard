@@ -19,7 +19,6 @@ Select a country and get a nice graph of the daily new Covid-19 cases in this co
 
 Original dataset by [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide).
 
-## Future developments :
-- display more than one country at once
-- Design responsiveness
-- find a host
+## Static version on Github Pages
+
+[GO !](https://krusty-is-cool.github.io/Covid-Dashboard/)
