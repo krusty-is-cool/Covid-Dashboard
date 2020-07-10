@@ -38,7 +38,8 @@ let choiceButton = casesButton.attr('id');
 const country = document.getElementById('country');
 let selectedCountry = country.value;
 
-const graph = document.getElementById('graph');
+const reportGraph = document.getElementById('report');
+const cumulativegraph = document.getElementById('cumulative');
 
 plotGraph();
 
@@ -72,8 +73,10 @@ function dataToArray(data){
     let x = [];
     let yCases = [];
     let yCasesAvrg = [];
+    let yCasesCumulative = [];
     let yDeaths = [];
     let yDeathsAvrg = [];
+    let yDeathsCumulative = [];
 
     for(let i in data){
         x.push(String(data[i]["year"])+"-"+String(data[i]["month"])+"-"+String(data[i]["day"]));
@@ -81,20 +84,48 @@ function dataToArray(data){
         yCases.push(data[i]["cases"]);
 
         if (i < data.length - 6){
-            yCasesAvrg.push((data[parseInt(i)+6]["cases"]+data[parseInt(i)+5]["cases"]+data[parseInt(i)+4]["cases"]+data[parseInt(i)+3]["cases"]+data[parseInt(i)+2]["cases"]+data[parseInt(i)+1]["cases"]+data[i]["cases"])/7);
+            yCasesAvrg.push(computeAverage(data, i, 7, 'cases'))
         } else {
             yCasesAvrg.push(NaN);
-        }     
+        }
+
         yDeaths.push(data[i]["deaths"]);
 
         if (i < data.length - 6){
-            yDeathsAvrg.push((data[parseInt(i)+6]["deaths"]+data[parseInt(i)+5]["deaths"]+data[parseInt(i)+4]["deaths"]+data[parseInt(i)+3]["deaths"]+data[parseInt(i)+2]["deaths"]+data[parseInt(i)+1]["deaths"]+data[i]["deaths"])/7);
+            yDeathsAvrg.push(computeAverage(data, i, 7, 'deaths'));
         } else {
             yDeathsAvrg.push(NaN);
         }   
     };
-    return [x, yCases, yCasesAvrg, yDeaths, yDeathsAvrg];
+
+    var i = 0;
+    yCases.slice().reverse().forEach((c) => {
+        yCasesCumulative.push(i + c);
+        i += c;
+    });
+
+    i = 0;
+    yDeaths.slice().reverse().forEach((d) => {
+        yDeathsCumulative.push(i + d);
+        i += d
+    })
+
+    return [x, yCases, yCasesAvrg, yDeaths, yDeathsAvrg, yCasesCumulative.reverse(), yDeathsCumulative.reverse()];
 };
+
+
+function computeAverage(x, index, range, type) {
+    return x.slice(
+        parseInt(index), parseInt(index) + range - 1
+    )
+    .map(x => x[type])
+    .reduce((acc, val) => acc + val)
+    / range
+}
+
+function accumulate(a, b) {
+    return a.reduce((acc, val) => acc + val) + b
+}
 
 function plotGraph(){
     let covidData = extractCoutryData();
@@ -117,8 +148,35 @@ function plotGraph(){
             y: mydata[2]
         };
 
-        var layout = {
+        var trace3 = {
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Cumulative',
+            x: mydata[0],
+            y: mydata[5]
+        }
+
+        var trace4 = {
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Cumulative (log)',
+            yaxis: 'y2',
+            x: mydata[0],
+            y: mydata[5].map(x => Math.log(x))
+        }
+
+        var layout1 = {
             title: 'Daily New Cases'
+        };
+
+        var layout2 = {
+            title: 'Cumulative Cases',
+            yaxis: {title: 'Number of cases'},
+            yaxis2: {
+                title: 'Number of cases (log scale)',
+                overlaying: 'y',
+                side: 'right'
+            }
         };
 
     } else if (choiceButton == deathsButton.attr('id')) {
@@ -137,18 +195,47 @@ function plotGraph(){
             y: mydata[4]
         };
 
-        var layout = {
-            title: 'Daily New Deaths'
+        var trace3 = {
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Cumulative',
+            x: mydata[0],
+            y: mydata[6]
+        }
+
+        var trace4 = {
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Cumulative (log)',
+            yaxis: 'y2',
+            x: mydata[0],
+            y: mydata[6].map(x => Math.log(x))
+        }
+
+        var layout1 = {
+            title: 'Daily New Deaths',
+        };
+
+        var layout2 = {
+            title: 'Cumulative Deaths',
+            yaxis: {title: 'Number of deaths'},
+            yaxis2: {
+                title: 'Number of deaths (log scale)',
+                overlaying: 'y',
+                side: 'right'
+            }
         };
 
     } else {
         alert("Sorry, we are not able to plot any graph.");
     }
 
-    var data = [trace1, trace2];
+    var reportData = [trace1, trace2];
+    var cumulativeData = [trace3, trace4];
     var config = { responsive: true }
 
-    console.log(data);
-    Plotly.newPlot(graph, data, layout, config);
+    console.log(reportData, cumulativeData);
+    Plotly.newPlot(reportGraph, reportData, layout1, config);
+    Plotly.newPlot(cumulativegraph, cumulativeData, layout2, config);
 };
 
