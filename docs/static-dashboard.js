@@ -45,6 +45,15 @@ plotGraph();
 
 country.addEventListener('input', function(){
     selectedCountry = country.value;
+    if (selectedCountry == "United_Kingdom"){
+        let alert = document.createElement("div")
+        document.getElementById('settings').appendChild(alert)
+        alert.setAttribute("class", "alert alert-warning alert-dismissible fade show mt-2");
+        alert.setAttribute("role", "alert");
+        alert.setAttribute("data-dismiss", "alert");
+        alert.innerHTML = "<strong>Note: </strong> On 3 July the UK announced an ongoing revision of historical data that lead to a negative number of new cases and an overall decrease in cases for the UK."
+        $('.alert').alert();
+    }
     plotGraph();
 });
 
