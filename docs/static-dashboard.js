@@ -59,6 +59,7 @@ $.ajax({
 
 Plotly.d3.csv(proxyurl + url3, function(data){ 
     console.log(data);
+    responseData3 = data;
     Plotly.d3.csv(proxyurl + url4, function(data){
         responseData4 = data;
         removeLoading("dataset3", "Johns Hopkins University CSSE")
