@@ -211,7 +211,8 @@ function extractCountryData(){
             for (let i in responseData3){
                 if (responseData3[i]["Province/State"]){
                     if (responseData3[i]["Province/State"] == selectedCountry){
-                        covidData.push([responseData3[i], responseData4[i]]);
+                        covidData.push(responseData3[i]); 
+                        covidData.push(responseData4[i]);
                     }
                 } else if (responseData3[i]["Country/Region"] == selectedCountry){
                     covidData.push(responseData3[i]);
