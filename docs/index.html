@@ -6,6 +6,10 @@
     <title>Covid-19 Dashboard</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
   </head>
 
   <body>
@@ -24,7 +28,7 @@
         </div>
         <nav class="navbar navbar-dark bg-dark p-2">
           <div class="container">
-            <h3 class="navbar-brand" style="color:white">Covid-19 Dashboard</h3>
+            <h3 class="navbar-brand" style="color:white">&#x1F637 Covid-19 Dashboard</h3>
               <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
@@ -35,20 +39,20 @@
       <main class="mt-4">
         <div class="container" id="settings">
 
-          <div class="row justify-content-between mb-4">
-            <div class="col-auto mr-auto align-self-center">
+          <div class="row justify-content-between no-gutter mb-4">
+            <div class="col-auto align-self-center">
               <h5>Dataset selection: </h5>
             </div>
             <div class="col-auto ml-auto">
               <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <label class="btn btn-secondary btn-dark active" id="dataset1">
+                <label class="btn btn-dark btn-dark active" id="dataset1">
                   <input type="radio" name="datasets" checked> European Centre for Disease Prevention and Control
                 </label>
-                <label class="btn btn-secondary btn-dark" id = "dataset2" disabled>
+                <label class="btn btn-dark btn-dark" id = "dataset2" disabled>
                   <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                    Loading...
                 </label>
-                <label class="btn btn-secondary btn-dark" id = "dataset3" disabled>
+                <label class="btn btn-dark btn-dark" id = "dataset3" disabled>
                   <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                    Loading...
                 </label>
@@ -56,8 +60,8 @@
             </div>
             
           </div>
-          <div class="row justify-content-between">
-            <div class="col-auto mr-auto">
+          <div class="row justify-content-between no-gutter">
+            <div class="col-auto mb-2">
               <div class="input-group flex-nowrap">
                 <div class="input-group-prepend">
                   <span class="input-group-text">Select a country</span>
@@ -73,12 +77,12 @@
                 </form>
               </div>
             </div>
-            <div class="col-auto ml-auto">
+            <div class="col-auto">
               <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <label class="btn btn-secondary btn-dark active">
+                <label class="btn btn-dark btn-dark active">
                   <input type="radio" name="dataPlotting" id="cases-button" checked>Cases
                 </label>
-                <label class="btn btn-secondary btn-dark">
+                <label class="btn btn-dark btn-dark">
                   <input type="radio" name="dataPlotting" id="deaths-button">Deaths
                 </label>
 

@@ -439,7 +439,13 @@ function plotGraph(){
         }
 
         var layout1 = {
-            title: 'Daily New Cases'
+            title: 'Daily New Cases',
+            yaxis: {title: 'Number of cases'},
+            legend: {
+                "orientation": "h",
+                x: 0.5,
+                xanchor: "center"
+            }
         };
 
         var layout2 = {
@@ -449,6 +455,11 @@ function plotGraph(){
                 title: 'Number of cases (log scale)',
                 overlaying: 'y',
                 side: 'right'
+            },
+            legend: {
+                "orientation": "h",
+                x: 0.5,
+                xanchor: "center"
             }
         };
 
@@ -487,6 +498,12 @@ function plotGraph(){
 
         var layout1 = {
             title: 'Daily New Deaths',
+            yaxis: {title: 'Number of deaths'},
+            legend: {
+                "orientation": "h",
+                x: 0.5,
+                xanchor: "center"
+            }
         };
 
         var layout2 = {
@@ -496,6 +513,11 @@ function plotGraph(){
                 title: 'Number of deaths (log scale)',
                 overlaying: 'y',
                 side: 'right'
+            },
+            legend: {
+                "orientation": "h",
+                x: 0.5,
+                xanchor: "center"
             }
         };
 
