@@ -38,7 +38,7 @@ const autoInput = new InputEvent('input');
 
 $.ajax({
     async: true,
-    url: proxyurl + url1,
+    url: url1,
     dataType: "json",
     success: function(result){
         responseData1 = result;
@@ -57,9 +57,9 @@ $.ajax({
     }
 });
 
-Plotly.d3.csv(proxyurl + url3, function(data){ 
+Plotly.d3.csv(url3, function(data){ 
     responseData3 = data;
-    Plotly.d3.csv(proxyurl + url4, function(data){
+    Plotly.d3.csv(url4, function(data){
         responseData4 = data;
         removeLoading("dataset3", "Johns Hopkins University CSSE")
     });
