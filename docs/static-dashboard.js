@@ -38,7 +38,7 @@ const autoInput = new InputEvent('input');
 
 $.ajax({
     async: true,
-    url: url1,
+    url: proxyurl + url1,
     dataType: "json",
     success: function(result){
         responseData1 = result;
