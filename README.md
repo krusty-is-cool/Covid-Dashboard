@@ -1,4 +1,4 @@
-# Covid-Dashboard
+# :mask: Covid-Dashboard
 A simple dashboard
 
 ## *Caution* : the Flask version is EXTREMELY late compared to the [static version](https://krusty-is-cool.github.io/Covid-Dashboard/)
@@ -36,6 +36,15 @@ Default country: France. Need to study the possibility to set default country de
 
 Warnings (not exhaustive):
 > Note: On 3 July the  UK announced an ongoing revision of historical data that lead to a negative number of new cases and an overall decrease in cases for the UK.
+
+### Screenshots *(desktop)*
+
+#### Online mode
+![Desktop view in online mode](img/desktop_view_online.PNG)
+![Bottom desktop view](img/desktop_view_bottom.PNG)
+
+#### Offline mode
+![Desktop view in offline mode](img/desktop_view_offline.PNG)
 
 ## Flask version
 
