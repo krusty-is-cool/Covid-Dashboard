@@ -15,6 +15,9 @@ let responseData3;
 let responseData4;
 
 //DOM
+const onlineTheme = "-dark";
+const offlineTheme = "-primary";
+
 const elt = document.getElementById("countryList");
 
 const dataset1 = $('#dataset1');
@@ -25,6 +28,8 @@ let choiceDataset = dataset1.attr('id');
 const casesButton = $('#cases-button');
 const deathsButton = $('#deaths-button');
 let choiceButton = casesButton.attr('id');
+
+const refreshButton = $('#refresh');
 
 const country = document.getElementById('country');
 let selectedCountry = country.value;
@@ -41,20 +46,30 @@ $.ajax({
     url: proxyurl + url1,
     dataType: "json",
     success: function(result){
+        if (document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, ''))) {
+            document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, '')));
+        }
         responseData1 = result;
         getCountries();
         plotGraph();
     }
-});
+}).fail(function(){
+    alertRequestFail("European Centre for Disease Prevention and Control");
+})
 
 $.ajax({
     async: true,
     url: url2 + dateOfEnd,
     dataType: "json",
     success: function(result){
+        if (document.getElementById("requestAlert" + "Oxford University BSG".replace(/\s+/g, ''))) {
+            document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Oxford University BSG".replace(/\s+/g, '')));
+        }
         responseData2 = result;
         removeLoading("dataset2", "Oxford University BSG");
     }
+}).fail(function(){
+    alertRequestFail("Oxford University BSG");
 });
 
 Plotly.d3.csv(url3, function(data){ 
@@ -67,25 +82,14 @@ Plotly.d3.csv(url3, function(data){
             alertRequestFail("Johns Hopkins University CSSE");
         }
         responseData4 = data;
-        removeLoading("dataset3", "Johns Hopkins University CSSE")
+        removeLoading("dataset3", "Johns Hopkins University CSSE");
     });
 } );
 
 //Events
 country.addEventListener('input', function(){
     selectedCountry = country.value;
-    if ((selectedCountry == "United_Kingdom") || (selectedCountry == "GBR")){
-        let alert = document.createElement("div")
-        document.getElementById('settings').appendChild(alert)
-        alert.setAttribute("class", "alert alert-warning alert-dismissible fade show mt-2");
-        alert.setAttribute("role", "alert");
-        alert.setAttribute("data-dismiss", "alert");
-        alert.setAttribute("id", "alertUK")
-        alert.innerHTML = "<strong>Note: </strong> On 3 July the UK announced an ongoing revision of historical data that lead to a negative number of new cases and an overall decrease in cases for the UK. <small><i>Click to close warning</i></small>"
-        $('.alert').alert();
-    } else if (document.getElementById("alertUK")) {
-        document.getElementById('settings').removeChild(document.getElementById("alertUK"))
-    }
+    alertCountry(["United_Kingdom", "GBR"], "<strong>Note: </strong> On 3 July the UK announced an ongoing revision of historical data that lead to a negative number of new cases and an overall decrease in cases for the UK. <small><i>Click to close warning</i></small>");
     plotGraph();
 });
 
@@ -126,6 +130,19 @@ casesButton.on('click', function(){
 deathsButton.on('click', function(){
     choiceButton = deathsButton.attr('id');
     plotGraph();
+});
+
+refreshButton.on('click', function(){
+    document.location.reload(false);
+    console.log("refresh");
+});
+
+window.addEventListener('offline', function(){
+    offlineMode();
+});
+
+window.addEventListener('online', function(){
+    onlineMode();
 });
 
 //FUNCTIONS DEFINITIONS
@@ -177,6 +194,54 @@ function updateCountryList(distinctCountries){
         elt.appendChild(newElt);
     };
 };
+
+function alertCountry(countryNames, messageHTML){
+    if (countryNames.some(name => name == selectedCountry)){
+        let alert = document.createElement("div")
+        document.getElementById('settings').appendChild(alert)
+        alert.setAttribute("class", "alert alert-warning alert-dismissible fade show mt-2");
+        alert.setAttribute("role", "alert");
+        alert.setAttribute("data-dismiss", "alert");
+        alert.setAttribute("id", "countryAlert")
+        alert.innerHTML = messageHTML;
+        $('.alert').alert();
+    } else if (document.getElementById("countryAlert")) {
+        document.getElementById('settings').removeChild(document.getElementById("countryAlert"));
+    }
+}
+
+function alertRequestFail(datasetName){
+    let alert = document.createElement("div");
+    document.getElementById('settings').appendChild(alert);
+    alert.setAttribute("class", "alert alert-danger alert-dismissible fade show mt-2");
+    alert.setAttribute("role", "alert");
+    alert.setAttribute("data-dismiss", "alert");
+    alert.setAttribute("id", "requestAlert" + datasetName.replace(/\s+/g, ''))
+    alert.innerHTML = "<strong>Error: </strong> The " + datasetName + " dataset can't be loaded. Are you connected to the internet ? <small><i>Click to close error</i></small>";
+    $('.alert').alert();
+}
+
+function offlineMode(){
+    document.getElementById("navbar").classList.replace("bg" + onlineTheme, "bg" + offlineTheme);
+    document.getElementById("mode").innerHTML = "<strong>offline mode</strong>";
+    let darkButtons = document.getElementsByClassName("btn" + onlineTheme);
+    replaceAll(darkButtons, "btn" + onlineTheme, "btn" + offlineTheme);
+    document.getElementById("refresh").setAttribute("disabled", "");
+}
+
+function onlineMode(){
+    document.getElementById("navbar").classList.replace("bg" + offlineTheme, "bg" + onlineTheme);
+    document.getElementById("mode").innerHTML = "";
+    let darkButtons = document.getElementsByClassName("btn" + offlineTheme);
+    replaceAll(darkButtons, "btn" + offlineTheme, "btn" + onlineTheme);
+    document.getElementById("refresh").removeAttribute("disabled");
+}
+
+function replaceAll(HTMLCollection, oldClass, newClass){
+    while (HTMLCollection.length > 0){
+        HTMLCollection[0].classList.replace(oldClass, newClass);
+    }
+}
 
 function removeLoading(parentID, text){
     let newElt = document.createElement('input');
