@@ -2,7 +2,6 @@
 const staticCacheName = 'site-static-v2'; //Don't forget to change version when modifying one of the assets
 const dynamicCacheName = 'site-dynamic-v2';
 const assets = [
-    '/',
     '/index.html',
     '/app.js',
     '/static-dashboard.js',
