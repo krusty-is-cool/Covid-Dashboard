@@ -16,7 +16,7 @@ const assets = [
 ];
 
 var lastUpdate = 0;
-const interTime = 10000;
+const interTime = 3600000;
 
 //Cache size limit function
 const limitCacheSize = (name, size) => {
