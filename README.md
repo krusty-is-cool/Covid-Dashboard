@@ -1,4 +1,4 @@
-# :mask: Covid-Dashboard
+# :mask: Covid-19 Dashboard
 A simple dashboard
 
 ## *Caution* : the Flask version is EXTREMELY late compared to the [static version](https://krusty-is-cool.github.io/Covid-Dashboard/)
