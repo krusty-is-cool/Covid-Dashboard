@@ -29,7 +29,7 @@ Select a country and get a nice graph of the daily new Covid-19 cases in this co
 
 Choose between three major wordwide datasets:
 - [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide).
-- [University of Oxford Blavatniuk School of Govvernment](https://covidtracker.bsg.ox.ac.uk/)
+- [University of Oxford Blavatnik School of Govvernment](https://covidtracker.bsg.ox.ac.uk/)
 - [Johns Hopkins University Centre for Systems Science and Engineering](https://github.com/CSSEGISandData)
 
 Default country: France. Need to study the possibility to set default country depending on user's location.
