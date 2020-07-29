@@ -60,6 +60,12 @@ $.ajax({
 Plotly.d3.csv(url3, function(data){ 
     responseData3 = data;
     Plotly.d3.csv(url4, function(data){
+        if (document.getElementById("requestAlert" + "Johns Hopkins University CSSE".replace(/\s+/g, ''))) {
+            document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Johns Hopkins University CSSE".replace(/\s+/g, '')));
+        }
+        if (error) {
+            alertRequestFail("Johns Hopkins University CSSE");
+        }
         responseData4 = data;
         removeLoading("dataset3", "Johns Hopkins University CSSE")
     });
