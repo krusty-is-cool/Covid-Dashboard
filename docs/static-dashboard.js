@@ -59,7 +59,7 @@ $.ajax({
 
 Plotly.d3.csv(url3, function(data){ 
     responseData3 = data;
-    Plotly.d3.csv(url4, function(data){
+    Plotly.d3.csv(url4, function(error, data){
         if (document.getElementById("requestAlert" + "Johns Hopkins University CSSE".replace(/\s+/g, ''))) {
             document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Johns Hopkins University CSSE".replace(/\s+/g, '')));
         }
