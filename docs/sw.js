@@ -2,13 +2,13 @@
 const staticCacheName = 'site-static-v2'; //Don't forget to change version when modifying one of the assets
 const dynamicCacheName = 'site-dynamic-v2';
 const assets = [
-    '/docs/',
-    '/docs/index.html',
-    '/docs/app.js',
-    '/docs/static-dashboard.js',
-    '/docs/site.webmanifest',
-    '/docs/favicon/android-chrome-192x192.png',
-    '/docs/favicon/favicon-32x32.png',
+    '/Covid-Dashboard/',
+    '/Covid-Dashboard/index.html',
+    '/Covid-Dashboard/app.js',
+    '/Covid-Dashboard/static-dashboard.js',
+    '/Covid-Dashboard/site.webmanifest',
+    '/Covid-Dashboard/favicon/android-chrome-192x192.png',
+    '/Covid-Dashboard/favicon/favicon-32x32.png',
     'https://cdn.plot.ly/plotly-latest.min.js',
     'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css',
     'https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js',
