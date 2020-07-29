@@ -10,7 +10,7 @@ A simple dashboard
 
 Only HTLM, CSS (Bootstrap CDN) and JavaScript. No server control.
 
-Progressive Web App standard. You can install it on you desktop and your mobile devices. There is a service worker which manages caches to keep the app available when the device is offline. In addition, it slightly improves the performances. The dynamic cache that stores the datasets renew every hour, although datasets are updated daily.
+Progressive Web App standard. You can install it on you desktop and your mobile devices. There is a service worker which manages caches to keep the app available when the device is offline. In addition, it slightly improves the performances. The dynamic cache that stores the datasets renews itself every hour, although datasets are updated daily.
 
 **Do not reload the page when you are offline. The user experience in that case is not yet satisfying.**
 
