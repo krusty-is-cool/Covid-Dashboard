@@ -2,7 +2,7 @@
 
 //GLOBAL CONSTANTS AND VARIABLES
 //Fetch Data
-const proxyurl = "https://krustyproxy.azurewebsites.net/";
+const proxyurl = "https://krustyproxy.westeurope.cloudapp.azure.com/";
 const today = new Date();
 const dateOfEnd = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
 const url1 = "opendata.ecdc.europa.eu/covid19/casedistribution/json"; // site that doesn’t send Access-Control-*
