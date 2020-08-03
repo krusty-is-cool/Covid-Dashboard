@@ -2,10 +2,9 @@
 
 //GLOBAL CONSTANTS AND VARIABLES
 //Fetch Data
-const proxyurl = "https://krustyproxy.westeurope.cloudapp.azure.com/";
 const today = new Date();
 const dateOfEnd = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-const url1 = "opendata.ecdc.europa.eu/covid19/casedistribution/json"; // site that doesn’t send Access-Control-*
+const url1 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetJSON/?url=https://opendata.ecdc.europa.eu/covid19/casedistribution/json";
 const url2 = "https://covidtrackerapi.bsg.ox.ac.uk/api/v2/stringency/date-range/2020-01-02/";
 const url3 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
 const url4 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
@@ -43,7 +42,7 @@ const autoInput = new InputEvent('input');
 
 $.ajax({
     async: true,
-    url: proxyurl + url1,
+    url: url1,
     dataType: "json",
     success: function(result){
         if (document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, ''))) {
