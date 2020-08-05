@@ -14,32 +14,38 @@ let responseData3;
 let responseData4;
 
 //DOM
+//themes
 const onlineTheme = "-dark";
 const offlineTheme = "-primary";
-
+//list of countries
 const elt = document.getElementById("countryList");
-
+//dataset buttons
 const dataset1 = $('#dataset1');
 const dataset2 = $('#dataset2');
 const dataset3 = $('#dataset3');
 let choiceDataset = dataset1.attr('id');
-
+//cases/deaths buttons
 const casesButton = $('#cases-button');
 const deathsButton = $('#deaths-button');
 let choiceButton = casesButton.attr('id');
-
+//refresh button
 const refreshButton = $('#refresh');
-
+//value in the list of countries
 const country = document.getElementById('country');
 let selectedCountry = country.value;
-
+//graphs
 const reportGraph = document.getElementById('report');
 const cumulativegraph = document.getElementById('cumulative');
-
+//default input in list of countries
 const autoInput = new InputEvent('input');
+//progress bar datasets loading
+const progress = document.getElementById('progressBar');
+//key numbers
+const nbDaily = document.getElementById('nbDaily');
+const nbCum = document.getElementById('nbCum');
 
 //HTTP REQUESTS, FUNCTION CALLING AND EVENTS
-
+//European Centre for Disease Prevention and Control
 $.ajax({
     async: true,
     url: url1,
@@ -49,13 +55,17 @@ $.ajax({
             document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, '')));
         }
         responseData1 = result;
+        removeLoading("dataset1", "European Centre for Disease Prevention and Control", true);
+        progressBar();
         getCountries();
         plotGraph();
     }
 }).fail(function(){
+    removeLoading("dataset1", "European Centre for Disease Prevention and Control", false);
+    progressBar();
     alertRequestFail("European Centre for Disease Prevention and Control");
 })
-
+//Oxford University Blavatnik School of Government
 $.ajax({
     async: true,
     url: url2 + dateOfEnd,
@@ -65,12 +75,15 @@ $.ajax({
             document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Oxford University BSG".replace(/\s+/g, '')));
         }
         responseData2 = result;
-        removeLoading("dataset2", "Oxford University BSG");
+        removeLoading("dataset2", "Oxford University BSG", true);
+        progressBar();
     }
 }).fail(function(){
+    removeLoading("dataset2", "Oxford University BSG", false);
+    progressBar();
     alertRequestFail("Oxford University BSG");
 });
-
+//Johns Hopkins University Centre for Science and System Engineering
 Plotly.d3.csv(url3, function(data){ 
     responseData3 = data;
     Plotly.d3.csv(url4, function(error, data){
@@ -78,17 +91,27 @@ Plotly.d3.csv(url3, function(data){
             document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Johns Hopkins University CSSE".replace(/\s+/g, '')));
         }
         if (error) {
+            removeLoading("dataset3", "Johns Hopkins University CSSE", false);
+            progressBar();
             alertRequestFail("Johns Hopkins University CSSE");
         }
-        responseData4 = data;
-        removeLoading("dataset3", "Johns Hopkins University CSSE");
+        else {
+            responseData4 = data;
+            removeLoading("dataset3", "Johns Hopkins University CSSE", true);
+            progressBar();
+        }
     });
 } );
 
 //Events
+$(document).ready(function(){
+    progressBar();
+});
+
 country.addEventListener('input', function(){
     selectedCountry = country.value;
-    alertCountry(["United_Kingdom", "GBR"], "<strong>Note: </strong> On 3 July the UK announced an ongoing revision of historical data that lead to a negative number of new cases and an overall decrease in cases for the UK. <small><i>Click to close warning</i></small>");
+    //country warnings
+    //alertCountry(["United_Kingdom", "GBR"], "<strong>Note: </strong> On 3 July the UK announced an ongoing revision of historical data that lead to a negative number of new cases and an overall decrease in cases for the UK. <small><i>Click to close warning</i></small>");
     plotGraph();
 });
 
@@ -242,13 +265,64 @@ function replaceAll(HTMLCollection, oldClass, newClass){
     }
 }
 
-function removeLoading(parentID, text){
+function removeLoading(parentID, text, enable){
     let newElt = document.createElement('input');
-    document.getElementById(parentID).removeAttribute("disabled");
+    if (enable == true){
+        document.getElementById(parentID).removeAttribute("disabled");
+    }
     document.getElementById(parentID).textContent = text;
     newElt.setAttribute("type", "radio");
     newElt.setAttribute("name", "datasets");
+    if (parentID == "dataset1"){
+        newElt.setAttribute("checked", "");
+    }
     document.getElementById(parentID).appendChild(newElt);
+}
+
+function progressBar(){
+    let value = progress.getAttribute('style').match(/\d+/g);
+    if (value <= 75){
+        let newValue = parseInt(value) + 25;
+        progress.setAttribute("style", "width: " + newValue.toString() + "%");
+        progress.setAttribute("aria-valuenow", newValue.toString());
+    }
+    if (progress.getAttribute('aria-valuenow') == 100){
+        document.getElementsByClassName('sticky-top')[0].removeChild(document.querySelector('.sticky-top > .progress'));
+    }
+}
+
+function updateNumbers(mydata){
+    let end = mydata[0].length - 1;
+    cases = mydata[1][end];
+    cumCases = mydata[5][end];
+    deaths = mydata[3][end];
+    cumDeaths = mydata[6][end];
+    tendencyCases = mydata[2][end] - mydata[2][end - 1];
+    tendencyDeaths = mydata[4][end] - mydata[4][end - 1];
+    let arrowCases;
+    if (tendencyCases > 0.1){
+        arrowCases = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-up-right' fill='red' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M6.5 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V4.5H7a.5.5 0 0 1-.5-.5z'/><path fill-rule='evenodd' d='M12.354 3.646a.5.5 0 0 1 0 .708l-9 9a.5.5 0 0 1-.708-.708l9-9a.5.5 0 0 1 .708 0z'/></svg>";
+    } else if (tendencyCases < -0.1){
+        arrowCases = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-down-right' fill='green' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M12 7.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H7a.5.5 0 0 1 0-1h4.5V8a.5.5 0 0 1 .5-.5z'/><path fill-rule='evenodd' d='M2.646 3.646a.5.5 0 0 1 .708 0l9 9a.5.5 0 0 1-.708.708l-9-9a.5.5 0 0 1 0-.708z'/></svg>";
+    }
+    let arrowDeaths;
+    if (tendencyDeaths > 0.1){
+        arrowDeaths = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-up-right' fill='red' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M6.5 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V4.5H7a.5.5 0 0 1-.5-.5z'/><path fill-rule='evenodd' d='M12.354 3.646a.5.5 0 0 1 0 .708l-9 9a.5.5 0 0 1-.708-.708l9-9a.5.5 0 0 1 .708 0z'/></svg>";
+    } else if (tendencyDeaths < -0.1){
+        arrowDeaths = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-down-right' fill='green' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M12 7.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H7a.5.5 0 0 1 0-1h4.5V8a.5.5 0 0 1 .5-.5z'/><path fill-rule='evenodd' d='M2.646 3.646a.5.5 0 0 1 .708 0l9 9a.5.5 0 0 1-.708.708l-9-9a.5.5 0 0 1 0-.708z'/></svg>";
+    }
+    if (choiceButton == casesButton.attr('id')){
+        nbDaily.innerHTML = cases.toString() + " " + arrowCases;
+        nbCum.innerHTML = cumCases.toString();
+        document.getElementById('nbDailyHeader').innerText = "Daily New Cases";
+        document.getElementById('nbCumHeader').innerText = "Cumulative Number of Cases";
+    }
+    if (choiceButton == deathsButton.attr('id')){
+        nbDaily.innerHTML = deaths.toString() + " " + arrowDeaths;
+        nbCum.innerHTML = cumDeaths.toString();
+        document.getElementById('nbDailyHeader').innerText = "Daily New Deaths";
+        document.getElementById('nbCumHeader').innerText = "Cumulative Number of Deaths";
+    }
 }
 
 function extractCountryData(){
@@ -327,22 +401,24 @@ function dataToArray(data){
                     yDeathsAvrg.push(NaN);
                 }   
             };
+
+            x = x.reverse();
+            yCases = yCases.reverse();
+            yCasesAvrg = yCasesAvrg.reverse();
+            yDeaths = yDeaths.reverse();
+            yDeathsAvrg = yDeathsAvrg.reverse();
         
             var i = 0;
-            yCases.slice().reverse().forEach((c) => {
+            yCases.slice().forEach((c) => {
                 yCasesCumulative.push(i + c);
                 i += c;
             });
-
-            yCasesCumulative = yCasesCumulative.reverse();
         
             i = 0;
-            yDeaths.slice().reverse().forEach((d) => {
+            yDeaths.slice().forEach((d) => {
                 yDeathsCumulative.push(i + d);
                 i += d
             });
-
-            yDeathsCumulative = yDeathsCumulative.reverse();
 
         break;
         case 'dataset2':
@@ -474,6 +550,7 @@ function computeDerivative(x, index, type) {
 function plotGraph(){
     let covidData = extractCountryData();
     let mydata = dataToArray(covidData);
+    updateNumbers(mydata);
     
     if (choiceButton == casesButton.attr('id')) {
         var trace1 = {
@@ -598,6 +675,12 @@ function plotGraph(){
     var reportData = [trace1, trace2];
     var cumulativeData = [trace3, trace4];
     var config = { responsive: true }
+
+    if (document.querySelector("#report > .d-flex"))
+    {
+        let elt = document.querySelector("#report > .d-flex");
+        document.getElementById('report').removeChild(elt);
+    }
 
     console.log(reportData, cumulativeData);
     Plotly.newPlot(reportGraph, reportData, layout1, config);
