@@ -293,23 +293,30 @@ function progressBar(){
 
 function updateNumbers(mydata){
     let end = mydata[0].length - 1;
-    cases = mydata[1][end];
-    cumCases = mydata[5][end];
-    deaths = mydata[3][end];
-    cumDeaths = mydata[6][end];
-    tendencyCases = mydata[2][end] - mydata[2][end - 1];
-    tendencyDeaths = mydata[4][end] - mydata[4][end - 1];
+    let dateNumbers = mydata[0][end];
+    let cases = mydata[1][end];
+    let cumCases = mydata[5][end];
+    let deaths = mydata[3][end];
+    let cumDeaths = mydata[6][end];
+    let tendencyCases = mydata[2][end] - mydata[2][end - 1];
+    let tendencyDeaths = mydata[4][end] - mydata[4][end - 1];
+    document.getElementById('date1').innerText = 'lastly reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
+    document.getElementById('date2').innerText = 'lastly reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
     let arrowCases;
     if (tendencyCases > 0.1){
         arrowCases = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-up-right' fill='red' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M6.5 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V4.5H7a.5.5 0 0 1-.5-.5z'/><path fill-rule='evenodd' d='M12.354 3.646a.5.5 0 0 1 0 .708l-9 9a.5.5 0 0 1-.708-.708l9-9a.5.5 0 0 1 .708 0z'/></svg>";
     } else if (tendencyCases < -0.1){
         arrowCases = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-down-right' fill='green' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M12 7.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H7a.5.5 0 0 1 0-1h4.5V8a.5.5 0 0 1 .5-.5z'/><path fill-rule='evenodd' d='M2.646 3.646a.5.5 0 0 1 .708 0l9 9a.5.5 0 0 1-.708.708l-9-9a.5.5 0 0 1 0-.708z'/></svg>";
+    } else if (tendencyCases == 0){
+        arrowCases = "";
     }
     let arrowDeaths;
     if (tendencyDeaths > 0.1){
         arrowDeaths = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-up-right' fill='red' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M6.5 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V4.5H7a.5.5 0 0 1-.5-.5z'/><path fill-rule='evenodd' d='M12.354 3.646a.5.5 0 0 1 0 .708l-9 9a.5.5 0 0 1-.708-.708l9-9a.5.5 0 0 1 .708 0z'/></svg>";
     } else if (tendencyDeaths < -0.1){
         arrowDeaths = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-down-right' fill='green' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M12 7.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H7a.5.5 0 0 1 0-1h4.5V8a.5.5 0 0 1 .5-.5z'/><path fill-rule='evenodd' d='M2.646 3.646a.5.5 0 0 1 .708 0l9 9a.5.5 0 0 1-.708.708l-9-9a.5.5 0 0 1 0-.708z'/></svg>";
+    } else if (tendencyDeaths ==  0){
+        arrowDeaths = "";
     }
     if (choiceButton == casesButton.attr('id')){
         nbDaily.innerHTML = cases.toString() + " " + arrowCases;
