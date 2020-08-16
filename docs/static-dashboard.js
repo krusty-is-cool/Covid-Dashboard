@@ -55,13 +55,14 @@ $.ajax({
             document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, '')));
         }
         responseData1 = result;
-        removeLoading("dataset1", "European Centre for Disease Prevention and Control", true);
+        removeLoadingFromButton("dataset1", "European Centre for Disease Prevention and Control", true);
         progressBar();
         getCountries();
         plotGraph();
     }
 }).fail(function(){
-    removeLoading("dataset1", "European Centre for Disease Prevention and Control", false);
+    removeLoadingFromButton("dataset1", "European Centre for Disease Prevention and Control", false);
+    removeLoadingFromGraph(reportGraph);
     progressBar();
     alertRequestFail("European Centre for Disease Prevention and Control");
 })
@@ -75,11 +76,12 @@ $.ajax({
             document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Oxford University BSG".replace(/\s+/g, '')));
         }
         responseData2 = result;
-        removeLoading("dataset2", "Oxford University BSG", true);
+        removeLoadingFromButton("dataset2", "Oxford University BSG", true);
         progressBar();
     }
 }).fail(function(){
-    removeLoading("dataset2", "Oxford University BSG", false);
+    removeLoadingFromButton("dataset2", "Oxford University BSG", false);
+    removeLoadingFromGraph(reportGraph);
     progressBar();
     alertRequestFail("Oxford University BSG");
 });
@@ -91,13 +93,14 @@ Plotly.d3.csv(url3, function(data){
             document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Johns Hopkins University CSSE".replace(/\s+/g, '')));
         }
         if (error) {
-            removeLoading("dataset3", "Johns Hopkins University CSSE", false);
+            removeLoadingFromButton("dataset3", "Johns Hopkins University CSSE", false);
+            removeLoadingFromGraph(reportGraph);
             progressBar();
             alertRequestFail("Johns Hopkins University CSSE");
         }
         else {
             responseData4 = data;
-            removeLoading("dataset3", "Johns Hopkins University CSSE", true);
+            removeLoadingFromButton("dataset3", "Johns Hopkins University CSSE", true);
             progressBar();
         }
     });
@@ -129,6 +132,7 @@ dataset2.on('click', function(){
     choiceDataset = dataset2.attr('id');
     document.getElementById('France').setAttribute("value", "FRA");
     document.getElementById('France').innerHTML = "FRA";
+    alertDataset("dataset2", "Since <strong>6, June 2020</strong> Oxford University BSG has not sent any relevent data without any explanation. <small><i>Click to close warning</i></small>");
     getCountries();
     country.dispatchEvent(autoInput);
 });
@@ -232,6 +236,19 @@ function alertCountry(countryNames, messageHTML){
     }
 }
 
+function alertDataset(dataset, messageHTML){
+    if (dataset == choiceDataset && document.getElementById("datasetAlert") == null){
+        let alert = document.createElement("div")
+        document.getElementById('settings').appendChild(alert)
+        alert.setAttribute("class", "alert alert-warning alert-dismissible fade show mt-2");
+        alert.setAttribute("role", "alert");
+        alert.setAttribute("data-dismiss", "alert");
+        alert.setAttribute("id", "datasetAlert")
+        alert.innerHTML = messageHTML;
+        $('.alert').alert();
+    } 
+}
+
 function alertRequestFail(datasetName){
     let alert = document.createElement("div");
     document.getElementById('settings').appendChild(alert);
@@ -265,7 +282,7 @@ function replaceAll(HTMLCollection, oldClass, newClass){
     }
 }
 
-function removeLoading(parentID, text, enable){
+function removeLoadingFromButton(parentID, text, enable){
     let newElt = document.createElement('input');
     if (enable == true){
         document.getElementById(parentID).removeAttribute("disabled");
@@ -277,6 +294,10 @@ function removeLoading(parentID, text, enable){
         newElt.setAttribute("checked", "");
     }
     document.getElementById(parentID).appendChild(newElt);
+}
+
+function removeLoadingFromGraph(parentElement){
+    reportGraph.removeChild(document.querySelector("#" + reportGraph.getAttribute("id") + "> .d-flex"));
 }
 
 function progressBar(){
@@ -689,7 +710,7 @@ function plotGraph(){
         document.getElementById('report').removeChild(elt);
     }
 
-    console.log(reportData, cumulativeData);
+    //console.log(reportData, cumulativeData);
     Plotly.newPlot(reportGraph, reportData, layout1, config);
     Plotly.newPlot(cumulativegraph, cumulativeData, layout2, config);
 };

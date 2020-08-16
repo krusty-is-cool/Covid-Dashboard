@@ -1,5 +1,5 @@
 //WARNING: in production, replace /docs/ by /Covid-Dashboard/
-const staticCacheName = 'site-static-v5'; //Don't forget to change version when modifying one of the assets
+const staticCacheName = 'site-static-v6'; //Don't forget to change version when modifying one of the assets
 const dynamicCacheName = 'site-dynamic-v2';
 const assets = [
     '/Covid-Dashboard/',
