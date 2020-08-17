@@ -4,7 +4,7 @@
 //Fetch Data
 const today = new Date();
 const dateOfEnd = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-const url1 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetJSON/?url=https://opendata.ecdc.europa.eu/covid19/casedistribution/json";
+const url1 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetCSV/?url=https://opendata.ecdc.europa.eu/covid19/casedistribution/csv";
 const url2 = "https://covidtrackerapi.bsg.ox.ac.uk/api/v2/stringency/date-range/2020-01-02/";
 const url3 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
 const url4 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
@@ -35,7 +35,7 @@ const country = document.getElementById('country');
 let selectedCountry = country.value;
 //graphs
 const reportGraph = document.getElementById('report');
-const cumulativegraph = document.getElementById('cumulative');
+const cumulativeGraph = document.getElementById('cumulative');
 //default input in list of countries
 const autoInput = new InputEvent('input');
 //progress bar datasets loading
@@ -46,26 +46,24 @@ const nbCum = document.getElementById('nbCum');
 
 //HTTP REQUESTS, FUNCTION CALLING AND EVENTS
 //European Centre for Disease Prevention and Control
-$.ajax({
-    async: true,
-    url: url1,
-    dataType: "json",
-    success: function(result){
-        if (document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, ''))) {
-            document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, '')));
-        }
-        responseData1 = result;
+Plotly.d3.csv(url1, function(error, data){
+    if (document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, ''))) {
+        document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, '')));
+    }
+    if (error){
+        removeLoadingFromButton("dataset1", "European Centre for Disease Prevention and Control", false, true);
+        removeLoadingFromGraph(reportGraph);
+        progressBar();
+        alertRequestFail("European Centre for Disease Prevention and Control");
+    } 
+    else {
+        responseData1 = data;
         removeLoadingFromButton("dataset1", "European Centre for Disease Prevention and Control", true);
         progressBar();
         getCountries();
         plotGraph();
     }
-}).fail(function(){
-    removeLoadingFromButton("dataset1", "European Centre for Disease Prevention and Control", false);
-    removeLoadingFromGraph(reportGraph);
-    progressBar();
-    alertRequestFail("European Centre for Disease Prevention and Control");
-})
+});
 //Oxford University Blavatnik School of Government
 $.ajax({
     async: true,
@@ -80,7 +78,7 @@ $.ajax({
         progressBar();
     }
 }).fail(function(){
-    removeLoadingFromButton("dataset2", "Oxford University BSG", false);
+    removeLoadingFromButton("dataset2", "Oxford University BSG", false, true);
     removeLoadingFromGraph(reportGraph);
     progressBar();
     alertRequestFail("Oxford University BSG");
@@ -93,7 +91,7 @@ Plotly.d3.csv(url3, function(data){
             document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Johns Hopkins University CSSE".replace(/\s+/g, '')));
         }
         if (error) {
-            removeLoadingFromButton("dataset3", "Johns Hopkins University CSSE", false);
+            removeLoadingFromButton("dataset3", "Johns Hopkins University CSSE", false, true);
             removeLoadingFromGraph(reportGraph);
             progressBar();
             alertRequestFail("Johns Hopkins University CSSE");
@@ -171,6 +169,12 @@ window.addEventListener('online', function(){
     onlineMode();
 });
 
+$(report).on("plotly_autosize", function(){
+    updateGraphSize();
+})
+
+//window.onorientationchange = updateGraphSize();
+
 //FUNCTIONS DEFINITIONS
 
 function getCountries(){
@@ -178,8 +182,8 @@ function getCountries(){
     var distinctCountries;
     switch (choiceDataset){
         case 'dataset1':
-            for (let i in responseData1["records"]){
-                countries.push(responseData1["records"][i]["countriesAndTerritories"]);
+            for (let i in responseData1){
+                countries.push(responseData1[i]["countriesAndTerritories"]);
             };
             distinctCountries = [...new Set(countries)];
             updateCountryList(distinctCountries);
@@ -229,7 +233,7 @@ function alertCountry(countryNames, messageHTML){
         alert.setAttribute("role", "alert");
         alert.setAttribute("data-dismiss", "alert");
         alert.setAttribute("id", "countryAlert")
-        alert.innerHTML = messageHTML;
+        alert.innerHTML = messageHTML + "<button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
         $('.alert').alert();
     } else if (document.getElementById("countryAlert")) {
         document.getElementById('settings').removeChild(document.getElementById("countryAlert"));
@@ -244,7 +248,7 @@ function alertDataset(dataset, messageHTML){
         alert.setAttribute("role", "alert");
         alert.setAttribute("data-dismiss", "alert");
         alert.setAttribute("id", "datasetAlert")
-        alert.innerHTML = messageHTML;
+        alert.innerHTML = messageHTML + "<button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
         $('.alert').alert();
     } 
 }
@@ -256,7 +260,7 @@ function alertRequestFail(datasetName){
     alert.setAttribute("role", "alert");
     alert.setAttribute("data-dismiss", "alert");
     alert.setAttribute("id", "requestAlert" + datasetName.replace(/\s+/g, ''))
-    alert.innerHTML = "<strong>Error: </strong> The " + datasetName + " dataset can't be loaded. Are you connected to the internet ? <small><i>Click to close error</i></small>";
+    alert.innerHTML = "<strong>Error: </strong> The " + datasetName + " dataset can't be loaded. Are you connected to the internet ? <small><i>Click to close error</i></small> <button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
     $('.alert').alert();
 }
 
@@ -282,12 +286,26 @@ function replaceAll(HTMLCollection, oldClass, newClass){
     }
 }
 
-function removeLoadingFromButton(parentID, text, enable){
+function updateGraphSize(){
+    if (window.innerHeight < window.innerWidth){
+        reportGraph.setAttribute("style", "width: auto; height: 85vh;");
+        cumulativeGraph.setAttribute("style", "width: auto; height: 85vh;");
+    } else {
+        reportGraph.setAttribute("style", "width: auto; height: 70vh;");
+        cumulativeGraph.setAttribute("style", "width: auto; height: 70vh;"); 
+    }
+}
+
+function removeLoadingFromButton(parentID, text, enable, error){
     let newElt = document.createElement('input');
     if (enable == true){
         document.getElementById(parentID).removeAttribute("disabled");
     }
-    document.getElementById(parentID).textContent = text;
+    if (error){
+        document.getElementById(parentID).innerHTML = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-exclamation-triangle-fill' fill='currentColor' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 5zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z'/></svg> " + text;
+    } else {
+        document.getElementById(parentID).textContent = text;
+    }
     newElt.setAttribute("type", "radio");
     newElt.setAttribute("name", "datasets");
     if (parentID == "dataset1"){
@@ -357,9 +375,9 @@ function extractCountryData(){
     let covidData = [];
     switch (choiceDataset){
         case 'dataset1':
-            for (let i in responseData1["records"]){
-                if (responseData1["records"][i]["countriesAndTerritories"] == selectedCountry){
-                    covidData.push(responseData1["records"][i]);
+            for (let i in responseData1){
+                if (responseData1[i]["countriesAndTerritories"] == selectedCountry){
+                    covidData.push(responseData1[i]);
                 };
             };
         break;
@@ -438,14 +456,14 @@ function dataToArray(data){
         
             var i = 0;
             yCases.slice().forEach((c) => {
-                yCasesCumulative.push(i + c);
-                i += c;
+                yCasesCumulative.push(i + parseInt(c));
+                i += parseInt(c);
             });
         
             i = 0;
             yDeaths.slice().forEach((d) => {
-                yDeathsCumulative.push(i + d);
-                i += d
+                yDeathsCumulative.push(i + parseInt(d));
+                i += parseInt(d);
             });
 
         break;
@@ -540,7 +558,7 @@ function computeAverage(x, index, range, type) {
                 parseInt(index), parseInt(index) + range
             )
             .map(x => x[type])
-            .reduce((acc, val) => acc + val)
+            .reduce((acc, val) => parseInt(acc) + parseInt(val))
             / range
         case 'dataset2':
             return x.slice(
@@ -619,7 +637,9 @@ function plotGraph(){
             legend: {
                 "orientation": "h",
                 x: 0.5,
-                xanchor: "center"
+                xanchor: "center",
+                y: 1.05,
+                yanchor: "middle"
             }
         };
 
@@ -634,7 +654,9 @@ function plotGraph(){
             legend: {
                 "orientation": "h",
                 x: 0.5,
-                xanchor: "center"
+                xanchor: "center",
+                y: 1.05,
+                yanchor: "middle"
             }
         };
 
@@ -677,7 +699,9 @@ function plotGraph(){
             legend: {
                 "orientation": "h",
                 x: 0.5,
-                xanchor: "center"
+                xanchor: "center",
+                y: 1.05,
+                yanchor: "middle"
             }
         };
 
@@ -692,7 +716,9 @@ function plotGraph(){
             legend: {
                 "orientation": "h",
                 x: 0.5,
-                xanchor: "center"
+                xanchor: "center",
+                y: 1.05,
+                yanchor: "middle"
             }
         };
 
@@ -712,6 +738,6 @@ function plotGraph(){
 
     //console.log(reportData, cumulativeData);
     Plotly.newPlot(reportGraph, reportData, layout1, config);
-    Plotly.newPlot(cumulativegraph, cumulativeData, layout2, config);
+    Plotly.newPlot(cumulativeGraph, cumulativeData, layout2, config);
 };
 
