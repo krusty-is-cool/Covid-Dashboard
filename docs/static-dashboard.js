@@ -130,7 +130,7 @@ dataset2.on('click', function(){
     choiceDataset = dataset2.attr('id');
     document.getElementById('France').setAttribute("value", "FRA");
     document.getElementById('France').innerHTML = "FRA";
-    alertDataset("dataset2", "Since <strong>6, June 2020</strong> Oxford University BSG has not sent any relevant data without any explanation. <small><i>Click to close warning</i></small>");
+    alertDataset("dataset2", "<strong>From August, 6 to August, 19 2020</strong> Oxford University BSG has not sent any relevant data. This can result in catch-up effects with surprising high numbers of cases/deaths in one day. Similar events could recur periodically. <small><i>Click to close warning</i></small>");
     getCountries();
     country.dispatchEvent(autoInput);
 });
