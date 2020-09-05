@@ -1,9 +1,6 @@
 # :mask: Covid-19 Dashboard
 A simple dashboard
 
-## *Caution* : the Flask version is EXTREMELY late compared to the [static version](https://krusty-is-cool.github.io/Covid-Dashboard/)
-### [**Check the static version first**](https://krusty-is-cool.github.io/Covid-Dashboard/)
-
 ## Static version on Github Pages
 
 [GO !](https://krusty-is-cool.github.io/Covid-Dashboard/)
@@ -45,22 +42,3 @@ Warnings (not exhaustive):
 
 #### Offline mode
 ![Desktop view in offline mode](img/desktop_view_offline.PNG)
-
-## Flask version
-
-Uses [Flask microframework](https://flask.palletsprojects.com/en/1.1.x/).
-
-**Will be updated to match static version or will be depreciated.**
-
-Client :
-- HTML
-- CSS (Bootstrap CDN)
-- JavaScript
-
-Server:
-- Python
-
-Not hosted at the moment.
-
-
-
