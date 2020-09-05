@@ -1,4 +1,4 @@
-//WARNING: in production, replace /github_pages/ by /Covid-Dashboard/
+//WARNING: in production, replace /docs/ by /Covid-Dashboard/
 const staticCacheName = 'site-static-v9'; //Don't forget to change version when modifying one of the assets
 const dynamicCacheName = 'site-dynamic-v2';
 const assets = [
