@@ -12,17 +12,17 @@ Progressive Web App standard. You can install it on you desktop and your mobile 
 **Do not reload the page when you are offline. The user experience in that case is not yet satisfying.**
 
 ### Tested on:
-| OS | Browser |
-| :------: | :------: |
-| Windows 10 | Microsoft  Edge 80 |
-| Windows 10 | Google Chrome |
-| iOS 13 | Safari |
-| iPadOS | Safari |
-| Android 9 | Google Chrome |
+| OS | Browser | Status |
+| :------: | :------: | :------: |
+| Windows 10 | Microsoft  Edge 80 | Ok |
+| Windows 10 | Google Chrome | Ok |
+| iOS 13 | Safari | Updating and cache issue #10|
+| iPadOS | Safari | Updating and cache issue #10| 
+| Android 9 | Google Chrome | Ok |
 
 ### Features
 
-Select a country and get a nice graph of the daily new Covid-19 cases in this country. Moving average on 7 days to filter the data.
+Select a country and get a nice graph of the daily new Covid-19 cases and deaths in this country. Moving average on 7 days to filter the data.
 
 Choose between three major wordwide datasets:
 - [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide).
