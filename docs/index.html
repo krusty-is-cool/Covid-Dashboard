@@ -78,7 +78,7 @@
                 <form id="selectCountry">
                   <select class="form-control" name="country" id="country" >
                     <optgroup id="defaultCountry" label="Default">
-                      <option id="France" value="France" selected>France</option>
+                      <option id="France" value="France" selected>France &#x26A1</option>
                     </optgroup>
                     <optgroup id="countryList" label="All Countries">          
                     </optgroup>
@@ -110,6 +110,22 @@
         </div>
         <!-- Numbers -->
         <div class="container mt-4" id="numbers">
+          <div class="progress" style="height: 5px;">
+            <div class="progress-bar bg-warning" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="statsBarCases"></div>
+            <div class="progress-bar bg-success" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="statsBarRecovered"></div>
+            <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="statsBarDeaths"></div>
+          </div>
+          <div class="row justify-content-between no-gutter mb-3">
+            <div class="col-auto align-self-center">
+              <small class="text-warning font-weight-bold">Active cases (7 days)</small>
+            </div>
+            <div class="col-auto align-self-center">
+              <small class="text-success font-weight-bold">Recovered</small>
+            </div>
+            <div class="col-auto align-self-center">
+              <small class="text-danger font-weight-bold">Deaths</small>
+            </div>
+          </div>
           <div class="card-deck">
             <div class="card border-dark mb-3 text-center">
               <h5 class="card-header" id="nbDailyHeader">Daily New Cases</h5>
@@ -126,7 +142,139 @@
               </div>
             </div>
           </div>
+          <div class="card border-dark text-center" id="enhancedData">
+            <h5 class="card-header" id="nbCumHeader">Enhanced Data &#x26A1</h5>
+            <div class="card-body">
+              <div class="row justify-content-center no-gutter">
+                <div class="col-auto align-self-center mb-3">
+                  <h5 id="incidenceRate">-</h5>
+                  <div>
+                    Incidence rate
+                    <a href="#">
+                      <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-question-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-toggle="modal" data-target="#incidenceRateModal">
+                        <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                      </svg>
+                    </a>
+                  </div>
+                </div> 
+                <div class="col-auto align-self-center mb-3">
+                  <h5 id="R0">-</h5>
+                  <div>
+                    R0
+                    <a href="#">
+                      <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-question-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-toggle="modal" data-target="#R0Modal">
+                        <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+                <div class="col-auto align-self-center mb-3">
+                  <h5 id="ruOccupationRate">- %</h5>
+                  <div title="Resuscitation unites occupation rate">
+                    RU occupation rate
+                    <a href="#">
+                      <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-question-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-toggle="modal" data-target="#ruOccupationRateModal">
+                        <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+                <div class="col-auto align-self-center mb-3">
+                  <h5 id="positivityRate">- %</h5>
+                  <div>
+                    Tests positivity rate
+                    <a href="#">
+                      <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-question-circle" fill="currentColor" xmlns="http://www.w3.org/2000/svg" data-toggle="modal" data-target="#positivityRateModal">
+                        <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <p class="card-text"><small class="text-muted" id="date3">lastly reported on -</small></p>
+            </div>
+          </div>
+          <!-- Modals -->
+          <div class="modal fade" id="incidenceRateModal" tabindex="-1" aria-labelledby="incidenceRateLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="incidenceRateLabel">Incidence rate</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Number of positive tests for 100,000 habitants in one week. Calculation: (100000*number of positive tests)/population. <br>
+                  Indicates the level of epidemiological activity.
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal fade" id="R0Modal" tabindex="-1" aria-labelledby="R0Label" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="R0Label">R0</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Reproduction factor. <br>
+                  Number of persons contaminated by one patient.
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal fade" id="ruOccupationRateModal" tabindex="-1" aria-labelledby="ruOccupationRateModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="ruOccupationRateModalLabel">Resuscitation units occupation rate</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Number of resuscitation beds occupied by COVID patients on the initial total number of resuscitation beds available.
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal fade" id="positivityRateModal" tabindex="-1" aria-labelledby="positivityRateLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="positivityRateLabel">Tests positivity rate</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Pourcentage of positive tests in one week. Calculation: (100*number of positive tests)/number of conducted tests.
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+        
         <!-- Graphs -->
         <div class="container-fluid-mr-3" id="report" style="width: auto; height: 70vh;">
           <div class="d-flex justify-content-center mt-4">
