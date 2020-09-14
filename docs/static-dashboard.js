@@ -8,15 +8,21 @@ const url1 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetCSV/?ur
 const url2 = "https://covidtrackerapi.bsg.ox.ac.uk/api/v2/stringency/date-range/2020-01-02/";
 const url3 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
 const url4 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
+const url5 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/FRcovidIndicators/";
 let responseData1;
 let responseData2;
 let responseData3;
 let responseData4;
+let responseEnhancedData;
 
 //DOM
 //themes
 const onlineTheme = "-dark";
 const offlineTheme = "-primary";
+//graph colors
+const primarycolor = "#ffc107";
+const secondarycolor = "#343a40";
+const thirdcolor = "#dc3545";
 //list of countries
 const elt = document.getElementById("countryList");
 //dataset buttons
@@ -43,6 +49,10 @@ const progress = document.getElementById('progressBar');
 //key numbers
 const nbDaily = document.getElementById('nbDaily');
 const nbCum = document.getElementById('nbCum');
+//statsBar
+const statsBarCases = document.getElementById('statsBarCases');
+const statsBarRecovered = document.getElementById('statsBarRecovered');
+const statsBarDeaths = document.getElementById('statsBarDeaths');
 
 //HTTP REQUESTS, FUNCTION CALLING AND EVENTS
 //European Centre for Disease Prevention and Control
@@ -103,7 +113,21 @@ Plotly.d3.csv(url3, function(data){
         }
     });
 } );
-
+//Enhanced Data Request data.gouv.fr
+$.ajax({
+    async: true,
+    url: url5,
+    dataType: "json",
+    success: function(result){
+        responseEnhancedData = result;
+        if (document.getElementById("requestAlert" + "Enhanced Data from data.gouv.fr".replace(/\s+/g, ''))) {
+            document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Enhanced Data from data.gouv.fr".replace(/\s+/g, '')));
+        }
+        enhancedData();
+    }
+}).fail(function(){
+    alertRequestFail("Enhanced Data from data.gouv.fr");
+});
 //Events
 $(document).ready(function(){
     progressBar();
@@ -111,6 +135,7 @@ $(document).ready(function(){
 
 country.addEventListener('input', function(){
     selectedCountry = country.value;
+    enhancedData();
     //country warnings
     //alertCountry(["United_Kingdom", "GBR"], "<strong>Note: </strong> On 3 July the UK announced an ongoing revision of historical data that lead to a negative number of new cases and an overall decrease in cases for the UK. <small><i>Click to close warning</i></small>");
     plotGraph();
@@ -120,7 +145,7 @@ dataset1.on('click', function(){
     choiceDataset = dataset1.attr('id');
     if (document.getElementById('France').getAttribute("value") != "France"){
         document.getElementById('France').setAttribute("value", "France");
-        document.getElementById('France').innerHTML = "France";
+        document.getElementById('France').innerHTML = "France &#x26A1";
     }
     getCountries();
     country.dispatchEvent(autoInput);
@@ -129,7 +154,7 @@ dataset1.on('click', function(){
 dataset2.on('click', function(){
     choiceDataset = dataset2.attr('id');
     document.getElementById('France').setAttribute("value", "FRA");
-    document.getElementById('France').innerHTML = "FRA";
+    document.getElementById('France').innerHTML = "FRA &#x26A1";
     alertDataset("dataset2", "<strong>From August, 6 to August, 19 2020</strong> Oxford University BSG has not sent any relevant data. This can result in catch-up effects with surprising high numbers of cases/deaths in one day. Similar events could recur periodically. <small><i>Click to close warning</i></small>");
     getCountries();
     country.dispatchEvent(autoInput);
@@ -139,7 +164,7 @@ dataset3.on('click', function(){
     choiceDataset = dataset3.attr('id');
     if (document.getElementById('France').getAttribute("value") != "France"){
         document.getElementById('France').setAttribute("value", "France");
-        document.getElementById('France').innerHTML = "France";
+        document.getElementById('France').innerHTML = "France &#x26A1";
     }
     getCountries();
     country.dispatchEvent(autoInput);
@@ -171,7 +196,7 @@ window.addEventListener('online', function(){
 
 $(report).on("plotly_autosize", function(){
     updateGraphSize();
-})
+});
 
 //window.onorientationchange = updateGraphSize();
 
@@ -220,7 +245,11 @@ function updateCountryList(distinctCountries){
     for (let i in distinctCountries){
         let newElt = document.createElement('option');
         newElt.setAttribute("value", distinctCountries[i]);
-        newElt.innerHTML = distinctCountries[i];
+        if (distinctCountries[i] == "France" || distinctCountries[i] == "FRA"){
+            newElt.innerHTML = distinctCountries[i] + " &#x26A1";
+        } else {
+            newElt.innerHTML = distinctCountries[i];
+        }
         elt.appendChild(newElt);
     };
 };
@@ -369,6 +398,34 @@ function updateNumbers(mydata){
         document.getElementById('nbDailyHeader').innerText = "Daily New Deaths";
         document.getElementById('nbCumHeader').innerText = "Cumulative Number of Deaths";
     }
+}
+
+function enhancedData(){
+    if (selectedCountry == "France" || selectedCountry == "FRA"){
+        document.getElementById('enhancedData').setAttribute("class", "card border-dark text-center");
+        document.getElementById("incidenceRate").innerText = responseEnhancedData["tx_incid"].slice(0,4);
+        document.getElementById("R0").innerText = responseEnhancedData["R"];
+        document.getElementById("ruOccupationRate").innerText = responseEnhancedData["taux_occupation_sae"].slice(0,3) + " %";
+        document.getElementById("positivityRate").innerText = responseEnhancedData["tx_pos"].slice(0,3) + " %";
+        document.getElementById("date3").innerText = "lastly reported on " + responseEnhancedData["extract_date"] + " (YYYY-MM-DD)";
+    } else {
+        document.getElementById('enhancedData').setAttribute("class", "card border-dark text-center d-none");
+    }
+}
+
+function statsBar(mydata){
+    let cumCases = mydata[5];
+    let cumDeaths = mydata[6][mydata[6].length - 1];
+    let casesOn7days = cumCases[cumCases.length -1] - cumCases[cumCases.length - 8];
+    let pourcentageDeaths = Math.round(cumDeaths*100/cumCases[cumCases.length-1]);
+    let pourcentageCasesOn7days = Math.round(casesOn7days*100/cumCases[cumCases.length-1]);
+    let pourcentageRecovered = 100 - pourcentageCasesOn7days - pourcentageDeaths;
+    statsBarCases.setAttribute("style", "width: " + pourcentageCasesOn7days.toString() + "%");
+    statsBarCases.setAttribute("aria-valuenow", pourcentageCasesOn7days.toString());
+    statsBarRecovered.setAttribute("style", "width: " + pourcentageRecovered.toString() + "%");
+    statsBarRecovered.setAttribute("aria-valuenow", pourcentageRecovered.toString());
+    statsBarDeaths.setAttribute("style", "width: " + pourcentageDeaths.toString() + "%");
+    statsBarDeaths.setAttribute("aria-valuenow", pourcentageDeaths.toString());
 }
 
 function extractCountryData(){
@@ -597,13 +654,15 @@ function plotGraph(){
     let covidData = extractCountryData();
     let mydata = dataToArray(covidData);
     updateNumbers(mydata);
+    statsBar(mydata);
     
     if (choiceButton == casesButton.attr('id')) {
         var trace1 = {
             type: "bar",
             name: "raw data",
             x: mydata[0],
-            y: mydata[1]
+            y: mydata[1],
+            marker: {color: primarycolor}
         };
 
         var trace2 = {
@@ -611,7 +670,8 @@ function plotGraph(){
             mode: 'lines',
             name: "7 days moving average",
             x: mydata[0],
-            y: mydata[2]
+            y: mydata[2],
+            line: {color: secondarycolor}
         };
 
         var trace3 = {
@@ -619,7 +679,8 @@ function plotGraph(){
             mode: 'lines',
             name: 'Cumulative',
             x: mydata[0],
-            y: mydata[5]
+            y: mydata[5],
+            line: {color: primarycolor}
         }
 
         var trace4 = {
@@ -628,7 +689,8 @@ function plotGraph(){
             name: 'Cumulative (log)',
             yaxis: 'y2',
             x: mydata[0],
-            y: mydata[5].map(x => Math.log(x))
+            y: mydata[5].map(x => Math.log(x)),
+            line: {color: secondarycolor}
         }
 
         var layout1 = {
@@ -665,7 +727,8 @@ function plotGraph(){
             type: "bar",
             name: "raw data",
             x: mydata[0],
-            y: mydata[3]
+            y: mydata[3],
+            marker: {color: thirdcolor}
         };
 
         var trace2 = {
@@ -673,7 +736,8 @@ function plotGraph(){
             mode: 'lines',
             name: "7 days moving average",
             x: mydata[0],
-            y: mydata[4]
+            y: mydata[4],
+            line: {color: secondarycolor}
         };
 
         var trace3 = {
@@ -681,7 +745,8 @@ function plotGraph(){
             mode: 'lines',
             name: 'Cumulative',
             x: mydata[0],
-            y: mydata[6]
+            y: mydata[6],
+            line: {color: thirdcolor}
         }
 
         var trace4 = {
@@ -690,7 +755,8 @@ function plotGraph(){
             name: 'Cumulative (log)',
             yaxis: 'y2',
             x: mydata[0],
-            y: mydata[6].map(x => Math.log(x))
+            y: mydata[6].map(x => Math.log(x)),
+            line: {color: secondarycolor}
         }
 
         var layout1 = {
