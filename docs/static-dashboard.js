@@ -5,7 +5,7 @@
 const today = new Date();
 const dateOfEnd = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
 const url1 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetCSV/?url=https://opendata.ecdc.europa.eu/covid19/casedistribution/csv";
-const url2 = "https://covidtrackerapi.bsg.ox.ac.uk/api/v2/stringency/date-range/2020-01-02/";
+const url2 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetJSON/?url=https://covidtrackerapi.bsg.ox.ac.uk/api/v2/stringency/date-range/2020-01-02/";
 const url3 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
 const url4 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
 const url5 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/FRcovidIndicators/";
@@ -407,7 +407,7 @@ function enhancedData(){
         document.getElementById("R0").innerText = responseEnhancedData["R"];
         document.getElementById("ruOccupationRate").innerText = responseEnhancedData["taux_occupation_sae"].slice(0,3) + " %";
         document.getElementById("positivityRate").innerText = responseEnhancedData["tx_pos"].slice(0,3) + " %";
-        document.getElementById("date3").innerText = "lastly reported on " + responseEnhancedData["extract_date"] + " (YYYY-MM-DD)";
+        document.getElementById("date3").innerText = "lastly reported on " + responseEnhancedData["extract_date"] + " (YYYY-MM-DD)" + " by data.gouv.fr";
     } else {
         document.getElementById('enhancedData').setAttribute("class", "card border-dark text-center d-none");
     }
