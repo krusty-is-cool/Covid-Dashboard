@@ -8,12 +8,13 @@ const url1 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetCSV/?ur
 const url2 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetJSON/?url=https://covidtrackerapi.bsg.ox.ac.uk/api/v2/stringency/date-range/2020-01-02/";
 const url3 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
 const url4 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
-const url5 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/FRcovidIndicators/";
+const url5 = "https://krusty.westeurope.cloudapp.azure.com/api/v2/FRcovidIndicators/";
 let responseData1;
 let responseData2;
 let responseData3;
 let responseData4;
 let responseEnhancedData;
+let responseEnhancedData2;
 
 //DOM
 //themes
@@ -23,6 +24,7 @@ const offlineTheme = "-primary";
 const primarycolor = "#ffc107";
 const secondarycolor = "#343a40";
 const thirdcolor = "#dc3545";
+const fourthcolor = "#28a745";
 //list of countries
 const elt = document.getElementById("countryList");
 //dataset buttons
@@ -53,6 +55,11 @@ const nbCum = document.getElementById('nbCum');
 const statsBarCases = document.getElementById('statsBarCases');
 const statsBarRecovered = document.getElementById('statsBarRecovered');
 const statsBarDeaths = document.getElementById('statsBarDeaths');
+//Modal Graphs
+const modalGraph1 = document.getElementById("incidenceRateGraph");
+const modalGraph2 = document.getElementById("R0Graph");
+const modalGraph3 = document.getElementById("ruOccupationRateGraph");
+const modalGraph4 = document.getElementById("positivityRateGraph");
 
 //HTTP REQUESTS, FUNCTION CALLING AND EVENTS
 //European Centre for Disease Prevention and Control
@@ -114,19 +121,18 @@ Plotly.d3.csv(url3, function(data){
     });
 } );
 //Enhanced Data Request data.gouv.fr
-$.ajax({
-    async: true,
-    url: url5,
-    dataType: "json",
-    success: function(result){
-        responseEnhancedData = result;
-        if (document.getElementById("requestAlert" + "Enhanced Data from data.gouv.fr".replace(/\s+/g, ''))) {
-            document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Enhanced Data from data.gouv.fr".replace(/\s+/g, '')));
-        }
+Plotly.d3.csv(url5, function(error, data){
+    responseEnhancedData2 = data;
+    if (document.getElementById("requestAlert" + "Enhanced Data from data.gouv.fr".replace(/\s+/g, ''))) {
+        document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Enhanced Data from data.gouv.fr".replace(/\s+/g, '')));
+    }
+    if (error) {
+        alertRequestFail("Enhanced Data from data.gouv.fr");
+    }
+    else {
+        responseEnhancedData2 = data;
         enhancedData();
     }
-}).fail(function(){
-    alertRequestFail("Enhanced Data from data.gouv.fr");
 });
 //Events
 $(document).ready(function(){
@@ -368,8 +374,8 @@ function updateNumbers(mydata){
     let cumDeaths = mydata[6][end];
     let tendencyCases = mydata[2][end] - mydata[2][end - 1];
     let tendencyDeaths = mydata[4][end] - mydata[4][end - 1];
-    document.getElementById('date1').innerText = 'lastly reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
-    document.getElementById('date2').innerText = 'lastly reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
+    document.getElementById('date1').innerText = 'Last reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
+    document.getElementById('date2').innerText = 'Last reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
     let arrowCases;
     if (tendencyCases > 0.1){
         arrowCases = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-up-right' fill='red' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M6.5 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V4.5H7a.5.5 0 0 1-.5-.5z'/><path fill-rule='evenodd' d='M12.354 3.646a.5.5 0 0 1 0 .708l-9 9a.5.5 0 0 1-.708-.708l9-9a.5.5 0 0 1 .708 0z'/></svg>";
@@ -401,13 +407,133 @@ function updateNumbers(mydata){
 }
 
 function enhancedData(){
+    let incidenceRate = {date:[], data:[]};
+    let R0 = {date:[], data:[]};
+    let ruOccupationRate = {date:[], data:[]};
+    let positivityRate = {date:[], data:[]};
+    let modalGraph1Color;
+    let modalGraph2Color;
+    let modalGraph3Color;
+    let modalGraph4Color;
+    for (let i in responseEnhancedData2){
+        if (responseEnhancedData2[i].tx_incid != "NA"){
+            incidenceRate.date.push(responseEnhancedData2[i].extract_date);
+            incidenceRate.data.push(responseEnhancedData2[i].tx_incid);
+        }
+        if (responseEnhancedData2[i].R != "NA"){
+            R0.date.push(responseEnhancedData2[i].extract_date);
+            R0.data.push(responseEnhancedData2[i].R);
+        }
+        if (responseEnhancedData2[i].taux_occupation_sae != "NA"){
+            ruOccupationRate.date.push(responseEnhancedData2[i].extract_date);
+            ruOccupationRate.data.push(responseEnhancedData2[i].taux_occupation_sae);
+        }
+        if (responseEnhancedData2[i].tx_pos != "NA"){
+            positivityRate.date.push(responseEnhancedData2[i].extract_date);
+            positivityRate.data.push(responseEnhancedData2[i].tx_pos);
+        }
+    }
     if (selectedCountry == "France" || selectedCountry == "FRA"){
         document.getElementById('enhancedData').setAttribute("class", "card border-dark text-center");
-        document.getElementById("incidenceRate").innerText = responseEnhancedData["tx_incid"].slice(0,4);
-        document.getElementById("R0").innerText = responseEnhancedData["R"];
-        document.getElementById("ruOccupationRate").innerText = responseEnhancedData["taux_occupation_sae"].slice(0,3) + " %";
-        document.getElementById("positivityRate").innerText = responseEnhancedData["tx_pos"].slice(0,3) + " %";
-        document.getElementById("date3").innerText = "lastly reported on " + responseEnhancedData["extract_date"] + " (YYYY-MM-DD)" + " by data.gouv.fr";
+        //data
+        document.getElementById("incidenceRate").innerText = incidenceRate.data[incidenceRate.data.length - 1].slice(0,4);
+        document.getElementById("date3").innerText = "Last reported on " + incidenceRate.date[incidenceRate.date.length - 1];
+        document.getElementById("R0").innerText = R0.data[R0.data.length - 1];
+        document.getElementById("date4").innerText = "Last reported on " + R0.date[R0.date.length - 1];
+        document.getElementById("ruOccupationRate").innerText = ruOccupationRate.data[ruOccupationRate.data.length - 1].slice(0,4) + " %";
+        document.getElementById("date5").innerText = "Last reported on " + ruOccupationRate.date[ruOccupationRate.date.length - 1];
+        document.getElementById("positivityRate").innerText = positivityRate.data[positivityRate.data.length - 1].slice(0,3) + " %";
+        document.getElementById("date6").innerText = "Last reported on " + positivityRate.date[positivityRate.date.length - 1];
+        //card colors
+        if (incidenceRate.data[incidenceRate.data.length - 1].slice(0,4) >= 50){
+            document.getElementById("incidenceRateCard").setAttribute("class", "card text-white bg-danger border-0 mb-3 text-center card-enhanced");
+            modalGraph1Color = thirdcolor;
+        } else if (incidenceRate.data[incidenceRate.data.length - 1].slice(0,4) >=10){
+            document.getElementById("incidenceRateCard").setAttribute("class", "card text-white bg-warning border-0 mb-3 text-center card-enhanced");
+            modalGraph1Color = primarycolor;
+        } else if (incidenceRate.data[incidenceRate.data.length - 1].slice(0,4) < 10){
+            document.getElementById("incidenceRateCard").setAttribute("class", "card text-white bg-success border-0 mb-3 text-center card-enhanced");
+            modalGraph1Color = fourthcolor;
+        }
+        if (R0.data[R0.data.length - 1] >= 1.5){
+            document.getElementById("R0Card").setAttribute("class", "card text-white bg-danger border-0 mb-3 text-center card-enhanced");
+            modalGraph2Color = thirdcolor;
+        } else if (R0.data[R0.data.length - 1] >= 1.0){
+            document.getElementById("R0Card").setAttribute("class", "card text-white bg-warning border-0 mb-3 text-center card-enhanced");
+            modalGraph2Color = primarycolor;
+        } else if (R0.data[R0.data.length - 1] < 1.0){
+            document.getElementById("R0Card").setAttribute("class", "card text-white bg-success border-0 mb-3 text-center card-enhanced");
+            modalGraph2Color = fourthcolor;
+        }
+        if (ruOccupationRate.data[ruOccupationRate.data.length - 1].slice(0,4) >= 60){
+            document.getElementById("ruOccupationRateCard").setAttribute("class", "card text-white bg-danger border-0 mb-3 text-center card-enhanced");
+            modalGraph3Color = thirdcolor;
+        } else if (ruOccupationRate.data[ruOccupationRate.data.length - 1].slice(0,4) >= 40){
+            document.getElementById("ruOccupationRateCard").setAttribute("class", "card text-white bg-warning border-0 mb-3 text-center card-enhanced");
+            modalGraph3Color = primarycolor;
+        } else if (ruOccupationRate.data[ruOccupationRate.data.length - 1].slice(0,4) < 40){
+            document.getElementById("ruOccupationRateCard").setAttribute("class", "card text-white bg-success border-0 mb-3 text-center card-enhanced");
+            modalGraph3Color = fourthcolor;
+        }
+        if (positivityRate.data[positivityRate.data.length - 1].slice(0,3) >= 10){
+            document.getElementById("positivityRateCard").setAttribute("class", "card text-white bg-danger border-0 mb-3 text-center card-enhanced");
+            modalGraph4Color = thirdcolor;
+        } else if (positivityRate.data[positivityRate.data.length - 1].slice(0,3) >= 5){
+            document.getElementById("positivityRateCard").setAttribute("class", "card text-white bg-warning border-0 mb-3 text-center card-enhanced");
+            modalGraph4Color = primarycolor;
+        } else if (positivityRate.data[positivityRate.data.length - 1].slice(0,3) < 5){
+            document.getElementById("positivityRateCard").setAttribute("class", "card text-white bg-success border-0 mb-3 text-center card-enhanced");
+            modalGraph4Color = fourthcolor;
+        }
+        //Modal Graphs
+        Plotly.newPlot( modalGraph1, [{
+            type: "bar",
+            x: incidenceRate.date,
+            y: incidenceRate.data,
+            marker: {color: modalGraph1Color} }], {
+            title: "Incidence Rate",
+            showlegend: false,
+            yaxis: {fixedrange: true},
+            xaxis : {fixedrange: true} }, {
+            responsive: true,
+            modeBarButtonsToRemove: ['zoom2d'],
+            displayModeBar: false} );
+        Plotly.newPlot( modalGraph2, [{
+            type: "bar",
+            x: R0.date,
+            y: R0.data,
+            marker: {color: modalGraph2Color} }], {
+            title: "Incidence Rate",
+            showlegend: false,
+            yaxis: {fixedrange: true},
+            xaxis : {fixedrange: true} }, {
+            responsive: true,
+            modeBarButtonsToRemove: ['zoom2d'],
+            displayModeBar: false} );
+        Plotly.newPlot( modalGraph3, [{
+            type: "bar",
+            x: ruOccupationRate.date,
+            y: ruOccupationRate.data,
+            marker: {color: modalGraph3Color} }], {
+            title: "Incidence Rate",
+            showlegend: false,
+            yaxis: {fixedrange: true},
+            xaxis : {fixedrange: true} }, {
+            responsive: true,
+            modeBarButtonsToRemove: ['zoom2d'],
+            displayModeBar: false} );
+        Plotly.newPlot( modalGraph4, [{
+            type: "bar",
+            x: positivityRate.date,
+            y: positivityRate.data,
+            marker: {color: modalGraph4Color} }], {
+            title: "Incidence Rate",
+            showlegend: false,
+            yaxis: {fixedrange: true},
+            xaxis : {fixedrange: true} }, {
+            responsive: true,
+            modeBarButtonsToRemove: ['zoom2d'],
+            displayModeBar: false} );
     } else {
         document.getElementById('enhancedData').setAttribute("class", "card border-dark text-center d-none");
     }
@@ -695,7 +821,11 @@ function plotGraph(){
 
         var layout1 = {
             title: 'Daily New Cases',
-            yaxis: {title: 'Number of cases'},
+            xaxis : {fixedrange: true},
+            yaxis: {
+                title: 'Number of cases',
+                fixedrange: true
+            },
             legend: {
                 "orientation": "h",
                 x: 0.5,
@@ -707,11 +837,16 @@ function plotGraph(){
 
         var layout2 = {
             title: 'Cumulative Cases',
-            yaxis: {title: 'Number of cases'},
+            xaxis : {fixedrange: true},
+            yaxis: {
+                title: 'Number of cases',
+                fixedrange: true
+            },
             yaxis2: {
                 title: 'Number of cases (log scale)',
                 overlaying: 'y',
-                side: 'right'
+                side: 'right',
+                fixedrange: true
             },
             legend: {
                 "orientation": "h",
@@ -761,7 +896,11 @@ function plotGraph(){
 
         var layout1 = {
             title: 'Daily New Deaths',
-            yaxis: {title: 'Number of deaths'},
+            xaxis : {fixedrange: true},
+            yaxis: {
+                title: 'Number of deaths',
+                fixedrange: true
+            },
             legend: {
                 "orientation": "h",
                 x: 0.5,
@@ -773,11 +912,16 @@ function plotGraph(){
 
         var layout2 = {
             title: 'Cumulative Deaths',
-            yaxis: {title: 'Number of deaths'},
+            xaxis : {fixedrange: true},
+            yaxis: {
+                title: 'Number of deaths',
+                fixedrange: true
+            },
             yaxis2: {
                 title: 'Number of deaths (log scale)',
                 overlaying: 'y',
-                side: 'right'
+                side: 'right',
+                fixedrange: true
             },
             legend: {
                 "orientation": "h",
@@ -794,7 +938,10 @@ function plotGraph(){
 
     var reportData = [trace1, trace2];
     var cumulativeData = [trace3, trace4];
-    var config = { responsive: true }
+    var config = { 
+        responsive: true,
+        displayModeBar: false 
+    };
 
     if (document.querySelector("#report > .d-flex"))
     {
