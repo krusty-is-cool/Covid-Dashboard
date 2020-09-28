@@ -1,5 +1,5 @@
 //WARNING: in production, replace /docs/ by /Covid-Dashboard/
-const staticCacheName = 'site-static-v11'; //Don't forget to change version when modifying one of the assets
+const staticCacheName = 'site-static-v12'; //Don't forget to change version when modifying one of the assets
 const dynamicCacheName = 'site-dynamic-v3';
 const assets = [
     '/Covid-Dashboard/',
@@ -7,6 +7,7 @@ const assets = [
     '/Covid-Dashboard/app.js',
     '/Covid-Dashboard/static-dashboard.js',
     '/Covid-Dashboard/site.webmanifest',
+    '/Covid-Dashboard/add_style.css',
     '/Covid-Dashboard/favicon/android-chrome-192x192.png',
     '/Covid-Dashboard/favicon/favicon-32x32.png',
     'https://cdn.plot.ly/plotly-latest.min.js',
