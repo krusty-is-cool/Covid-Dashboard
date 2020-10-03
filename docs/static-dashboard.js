@@ -15,6 +15,8 @@ let responseData3;
 let responseData4;
 let responseEnhancedData;
 let responseEnhancedData2;
+let modalGraphsData;
+let modalGraphsColor;
 
 //DOM
 //themes
@@ -131,7 +133,8 @@ Plotly.d3.csv(url5, function(error, data){
     }
     else {
         responseEnhancedData2 = data;
-        enhancedData();
+        modalGraphsData = enhancedDataExtractor();
+        modalGraphsColor = enhancedData(modalGraphsData);
     }
 });
 //Events
@@ -141,7 +144,7 @@ $(document).ready(function(){
 
 country.addEventListener('input', function(){
     selectedCountry = country.value;
-    enhancedData();
+    modalGraphsColor = enhancedData(modalGraphsData);
     //country warnings
     //alertCountry(["United_Kingdom", "GBR"], "<strong>Note: </strong> On 3 July the UK announced an ongoing revision of historical data that lead to a negative number of new cases and an overall decrease in cases for the UK. <small><i>Click to close warning</i></small>");
     plotGraph();
@@ -204,6 +207,21 @@ $(report).on("plotly_autosize", function(){
     updateGraphSize();
 });
 
+$('#incidenceRateModal').on('shown.bs.modal', function (e) {
+    modalGraphsPlot(modalGraphsData, modalGraphsColor, 1);    
+});
+
+$('#R0Modal').on('shown.bs.modal', function (e) {
+    modalGraphsPlot(modalGraphsData, modalGraphsColor, 2);    
+});
+
+$('#ruOccupationRateModal').on('shown.bs.modal', function (e) {
+    modalGraphsPlot(modalGraphsData, modalGraphsColor, 3);    
+});
+
+$('#positivityRateModal').on('shown.bs.modal', function (e) {
+    modalGraphsPlot(modalGraphsData, modalGraphsColor, 4);    
+});
 //window.onorientationchange = updateGraphSize();
 
 //FUNCTIONS DEFINITIONS
@@ -325,9 +343,17 @@ function updateGraphSize(){
     if (window.innerHeight < window.innerWidth){
         reportGraph.setAttribute("style", "width: auto; height: 85vh;");
         cumulativeGraph.setAttribute("style", "width: auto; height: 85vh;");
+        modalGraph1.setAttribute("style", "width: auto; height: 70vh;");
+        modalGraph2.setAttribute("style", "width: auto; height: 70vh;");
+        modalGraph3.setAttribute("style", "width: auto; height: 70vh;");
+        modalGraph4.setAttribute("style", "width: auto; height: 70vh;");
     } else {
         reportGraph.setAttribute("style", "width: auto; height: 70vh;");
         cumulativeGraph.setAttribute("style", "width: auto; height: 70vh;"); 
+        modalGraph1.setAttribute("style", "width: auto; height: 50vh;");
+        modalGraph2.setAttribute("style", "width: auto; height: 50vh;");
+        modalGraph3.setAttribute("style", "width: auto; height: 50vh;");
+        modalGraph4.setAttribute("style", "width: auto; height: 50vh;");
     }
 }
 
@@ -406,15 +432,12 @@ function updateNumbers(mydata){
     }
 }
 
-function enhancedData(){
+function enhancedDataExtractor(){
     let incidenceRate = {date:[], data:[]};
     let R0 = {date:[], data:[]};
     let ruOccupationRate = {date:[], data:[]};
     let positivityRate = {date:[], data:[]};
-    let modalGraph1Color;
-    let modalGraph2Color;
-    let modalGraph3Color;
-    let modalGraph4Color;
+
     for (let i in responseEnhancedData2){
         if (responseEnhancedData2[i].tx_incid != "NA"){
             incidenceRate.date.push(responseEnhancedData2[i].extract_date);
@@ -433,10 +456,23 @@ function enhancedData(){
             positivityRate.data.push(responseEnhancedData2[i].tx_pos);
         }
     }
+    
+    return [incidenceRate, R0, ruOccupationRate, positivityRate];
+}
+
+function enhancedData(eData){
+    let incidenceRate = eData[0];
+    let R0 = eData[1];
+    let ruOccupationRate = eData[2];
+    let positivityRate = eData[3];
+    let modalGraph1Color;
+    let modalGraph2Color;
+    let modalGraph3Color;
+    let modalGraph4Color;
     if (selectedCountry == "France" || selectedCountry == "FRA"){
         document.getElementById('enhancedData').setAttribute("class", "card border-dark text-center");
         //data
-        document.getElementById("incidenceRate").innerText = incidenceRate.data[incidenceRate.data.length - 1].slice(0,4);
+        document.getElementById("incidenceRate").innerText = incidenceRate.data[incidenceRate.data.length - 1].slice(0,5);
         document.getElementById("date3").innerText = "Last reported on " + incidenceRate.date[incidenceRate.date.length - 1];
         document.getElementById("R0").innerText = R0.data[R0.data.length - 1];
         document.getElementById("date4").innerText = "Last reported on " + R0.date[R0.date.length - 1];
@@ -485,57 +521,82 @@ function enhancedData(){
             document.getElementById("positivityRateCard").setAttribute("class", "card text-white bg-success border-0 mb-3 text-center card-enhanced");
             modalGraph4Color = fourthcolor;
         }
-        //Modal Graphs
-        Plotly.newPlot( modalGraph1, [{
-            type: "bar",
-            x: incidenceRate.date,
-            y: incidenceRate.data,
-            marker: {color: modalGraph1Color} }], {
-            title: "Incidence Rate",
-            showlegend: false,
-            yaxis: {fixedrange: true},
-            xaxis : {fixedrange: true} }, {
-            responsive: true,
-            modeBarButtonsToRemove: ['zoom2d'],
-            displayModeBar: false} );
-        Plotly.newPlot( modalGraph2, [{
-            type: "bar",
-            x: R0.date,
-            y: R0.data,
-            marker: {color: modalGraph2Color} }], {
-            title: "Incidence Rate",
-            showlegend: false,
-            yaxis: {fixedrange: true},
-            xaxis : {fixedrange: true} }, {
-            responsive: true,
-            modeBarButtonsToRemove: ['zoom2d'],
-            displayModeBar: false} );
-        Plotly.newPlot( modalGraph3, [{
-            type: "bar",
-            x: ruOccupationRate.date,
-            y: ruOccupationRate.data,
-            marker: {color: modalGraph3Color} }], {
-            title: "Incidence Rate",
-            showlegend: false,
-            yaxis: {fixedrange: true},
-            xaxis : {fixedrange: true} }, {
-            responsive: true,
-            modeBarButtonsToRemove: ['zoom2d'],
-            displayModeBar: false} );
-        Plotly.newPlot( modalGraph4, [{
-            type: "bar",
-            x: positivityRate.date,
-            y: positivityRate.data,
-            marker: {color: modalGraph4Color} }], {
-            title: "Incidence Rate",
-            showlegend: false,
-            yaxis: {fixedrange: true},
-            xaxis : {fixedrange: true} }, {
-            responsive: true,
-            modeBarButtonsToRemove: ['zoom2d'],
-            displayModeBar: false} );
     } else {
         document.getElementById('enhancedData').setAttribute("class", "card border-dark text-center d-none");
+    }
+    return [modalGraph1Color, modalGraph2Color, modalGraph3Color, modalGraph4Color]
+}
+
+function modalGraphsPlot(graphData, graphColors, modalChoice){
+    let incidenceRate = graphData[0];
+    let R0 = graphData[1];
+    let ruOccupationRate = graphData[2];
+    let positivityRate = graphData[3];
+    let modalGraph1Color = graphColors[0];
+    let modalGraph2Color = graphColors[1];
+    let modalGraph3Color = graphColors[2];
+    let modalGraph4Color = graphColors[3];
+    //Modal Graphs
+    switch(modalChoice){
+        case 1:
+            Plotly.newPlot( modalGraph1, [{
+                type: "bar",
+                x: incidenceRate.date,
+                y: incidenceRate.data,
+                marker: {color: modalGraph1Color} }], {
+                title: "Incidence Rate",
+                showlegend: false,
+                yaxis: {fixedrange: true},
+                xaxis : {fixedrange: true} }, {
+                responsive: true,
+                modeBarButtonsToRemove: ['zoom2d'],
+                displayModeBar: false} );
+        break;
+        case 2:
+            Plotly.newPlot( modalGraph2, [{
+                type: "bar",
+                x: R0.date,
+                y: R0.data,
+                marker: {color: modalGraph2Color} }], {
+                title: "R0",
+                showlegend: false,
+                yaxis: {fixedrange: true},
+                xaxis : {fixedrange: true} }, {
+                responsive: true,
+                modeBarButtonsToRemove: ['zoom2d'],
+                displayModeBar: false} );
+        break;
+        case 3:
+            Plotly.newPlot( modalGraph3, [{
+                type: "bar",
+                x: ruOccupationRate.date,
+                y: ruOccupationRate.data,
+                marker: {color: modalGraph3Color} }], {
+                title: "Resuscitation units occupation rate",
+                showlegend: false,
+                yaxis: {fixedrange: true},
+                xaxis : {fixedrange: true} }, {
+                responsive: true,
+                modeBarButtonsToRemove: ['zoom2d'],
+                displayModeBar: false} );
+        break;
+        case 4:
+            Plotly.newPlot( modalGraph4, [{
+                type: "bar",
+                x: positivityRate.date,
+                y: positivityRate.data,
+                marker: {color: modalGraph4Color} }], {
+                title: "Tests Positivity Rate",
+                showlegend: false,
+                yaxis: {fixedrange: true},
+                xaxis : {fixedrange: true} }, {
+                responsive: true,
+                modeBarButtonsToRemove: ['zoom2d'],
+                displayModeBar: false} );
+        break;
+        default:
+            console.log("Wrong modal choice");
+        break;
     }
 }
 
