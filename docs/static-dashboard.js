@@ -478,7 +478,7 @@ function enhancedData(eData){
         document.getElementById("date4").innerText = "Last reported on " + R0.date[R0.date.length - 1];
         document.getElementById("ruOccupationRate").innerText = ruOccupationRate.data[ruOccupationRate.data.length - 1].slice(0,4) + " %";
         document.getElementById("date5").innerText = "Last reported on " + ruOccupationRate.date[ruOccupationRate.date.length - 1];
-        document.getElementById("positivityRate").innerText = positivityRate.data[positivityRate.data.length - 1].slice(0,3) + " %";
+        document.getElementById("positivityRate").innerText = positivityRate.data[positivityRate.data.length - 1].slice(0,4) + " %";
         document.getElementById("date6").innerText = "Last reported on " + positivityRate.date[positivityRate.date.length - 1];
         //card colors
         if (incidenceRate.data[incidenceRate.data.length - 1].slice(0,4) >= 50){
@@ -511,13 +511,13 @@ function enhancedData(eData){
             document.getElementById("ruOccupationRateCard").setAttribute("class", "card text-white bg-success border-0 mb-3 text-center card-enhanced");
             modalGraph3Color = fourthcolor;
         }
-        if (positivityRate.data[positivityRate.data.length - 1].slice(0,3) >= 10){
+        if (positivityRate.data[positivityRate.data.length - 1].slice(0,4) >= 10){
             document.getElementById("positivityRateCard").setAttribute("class", "card text-white bg-danger border-0 mb-3 text-center card-enhanced");
             modalGraph4Color = thirdcolor;
-        } else if (positivityRate.data[positivityRate.data.length - 1].slice(0,3) >= 5){
+        } else if (positivityRate.data[positivityRate.data.length - 1].slice(0,4) >= 5){
             document.getElementById("positivityRateCard").setAttribute("class", "card text-white bg-warning border-0 mb-3 text-center card-enhanced");
             modalGraph4Color = primarycolor;
-        } else if (positivityRate.data[positivityRate.data.length - 1].slice(0,3) < 5){
+        } else if (positivityRate.data[positivityRate.data.length - 1].slice(0,4) < 5){
             document.getElementById("positivityRateCard").setAttribute("class", "card text-white bg-success border-0 mb-3 text-center card-enhanced");
             modalGraph4Color = fourthcolor;
         }
