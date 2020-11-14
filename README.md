@@ -1,9 +1,9 @@
 # :mask: Covid-19 Dashboard
 A simple dashboard
 
-## Static version on Github Pages
+## Static version
 
-[GO !](https://krusty-is-cool.github.io/Covid-Dashboard/)
+[GO !](https://www.coviddash.app)
 
 Only HTLM, CSS (Bootstrap CDN) and JavaScript. No server control.
 
