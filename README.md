@@ -38,4 +38,4 @@ Warnings (not exhaustive):
 
 ![Desktop view in online mode](img/desktop_view_online.PNG)
 ![Graph desktop view 1](img/desktop_view_bottom.PNG)
-![Graph desktop view 2](img/desktop_view_bottom2.PNG)
+![Graph desktop view 2](img/desktop_view_bottom2.png)
