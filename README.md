@@ -36,9 +36,6 @@ Warnings (not exhaustive):
 
 ### Screenshots *(desktop)*
 
-#### Online mode
 ![Desktop view in online mode](img/desktop_view_online.PNG)
-![Bottom desktop view](img/desktop_view_bottom.PNG)
-
-#### Offline mode
-![Desktop view in offline mode](img/desktop_view_offline.PNG)
+![Graph desktop view 1](img/desktop_view_bottom.PNG)
+![Graph desktop view 2](img/desktop_view_bottom2.PNG)
