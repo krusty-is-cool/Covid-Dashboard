@@ -419,14 +419,14 @@ function updateNumbers(mydata){
         arrowDeaths = "";
     }
     if (choiceButton == casesButton.attr('id')){
-        nbDaily.innerHTML = cases.toString() + " " + arrowCases;
-        nbCum.innerHTML = cumCases.toString();
+        nbDaily.innerHTML = Number(cases.toString()).toLocaleString('en-UK') + " " + arrowCases;
+        nbCum.innerHTML = Number(cumCases.toString()).toLocaleString('en-UK');
         document.getElementById('nbDailyHeader').innerText = "Daily New Cases";
         document.getElementById('nbCumHeader').innerText = "Cumulative Number of Cases";
     }
     if (choiceButton == deathsButton.attr('id')){
-        nbDaily.innerHTML = deaths.toString() + " " + arrowDeaths;
-        nbCum.innerHTML = cumDeaths.toString();
+        nbDaily.innerHTML = Number(deaths.toString()).toLocaleString('en-UK') + " " + arrowDeaths;
+        nbCum.innerHTML = Number(cumDeaths.toString()).toLocaleString('en-UK');
         document.getElementById('nbDailyHeader').innerText = "Daily New Deaths";
         document.getElementById('nbCumHeader').innerText = "Cumulative Number of Deaths";
     }
