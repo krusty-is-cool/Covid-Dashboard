@@ -16,8 +16,8 @@ Progressive Web App standard. You can install it on you desktop and your mobile 
 | :------: | :------: | :------: |
 | Windows 10 | Microsoft  Edge 80 | Ok |
 | Windows 10 | Google Chrome | Ok |
-| iOS 13 | Safari | Ok issue #10 is closed |
-| iPadOS | Safari | Ok issue #10 is closed | 
+| iOS 14 | Safari | Ok except issue #10 |
+| iPadOS 14 | Safari | Ok except issue #10 | 
 | Android 9 | Google Chrome | Ok |
 
 ### Features
