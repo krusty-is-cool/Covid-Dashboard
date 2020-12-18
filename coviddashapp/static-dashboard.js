@@ -79,6 +79,7 @@ Plotly.d3.csv(url1, function(error, data){
         responseData1 = data;
         removeLoadingFromButton("dataset1", "European Centre for Disease Prevention and Control", true);
         progressBar();
+        alertDataset("dataset1", "<strong>WARNING!</strong> ECDC switched to a weekly reporting schedule for the COVID-19 situation worldwide and in the EU/EEA and the UK on 17 December this year. Hence, all daily updates have been discontinued from 14 December. ECDC will publish updates on the number of cases and deaths reported worldwide and aggregated by week every Thursday. As an exception, the weekly updates for the end-of-year festive season will be published on 23 December and 30 December 2020.<br><strong>We recommend using Johns Hopkins University dataset until we fix this.</strong>");
         getCountries();
         plotGraph();
     }
