@@ -9,7 +9,6 @@ const url2 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetJSON/?u
 const url3 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
 const url4 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
 const url5 = "https://krusty.westeurope.cloudapp.azure.com/api/v2/FRcovidIndicators/";
-let responseData1;
 let responseData2;
 let responseData3;
 let responseData4;
@@ -32,7 +31,6 @@ const elt = document.getElementById("countryList");
 //dataset buttons
 const dataset1 = $('#dataset1');
 const dataset2 = $('#dataset2');
-const dataset3 = $('#dataset3');
 let choiceDataset = dataset1.attr('id');
 //cases/deaths buttons
 const casesButton = $('#cases-button');
@@ -64,24 +62,21 @@ const modalGraph3 = document.getElementById("ruOccupationRateGraph");
 const modalGraph4 = document.getElementById("positivityRateGraph");
 
 //HTTP REQUESTS, FUNCTION CALLING AND EVENTS
-//European Centre for Disease Prevention and Control
-Plotly.d3.csv(url1, function(error, data){
-    if (document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, ''))) {
-        document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, '')));
+//Enhanced Data Request data.gouv.fr
+Plotly.d3.csv(url5, function(error, data){
+    responseEnhancedData2 = data;
+    if (document.getElementById("requestAlert" + "Enhanced Data from data.gouv.fr".replace(/\s+/g, ''))) {
+        document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Enhanced Data from data.gouv.fr".replace(/\s+/g, '')));
     }
-    if (error){
-        removeLoadingFromButton("dataset1", "European Centre for Disease Prevention and Control", false, true);
-        removeLoadingFromGraph(reportGraph);
+    if (error) {
+        alertRequestFail("Enhanced Data from data.gouv.fr");
         progressBar();
-        alertRequestFail("European Centre for Disease Prevention and Control");
-    } 
+    }
     else {
-        responseData1 = data;
-        removeLoadingFromButton("dataset1", "European Centre for Disease Prevention and Control", true);
+        responseEnhancedData2 = data;
+        modalGraphsData = enhancedDataExtractor();
+        modalGraphsColor = enhancedData(modalGraphsData);
         progressBar();
-        alertDataset("dataset1", "<strong>WARNING!</strong> ECDC switched to a weekly reporting schedule for the COVID-19 situation worldwide and in the EU/EEA and the UK on 17 December this year. Hence, all daily updates have been discontinued from 14 December. ECDC will publish updates on the number of cases and deaths reported worldwide and aggregated by week every Thursday. As an exception, the weekly updates for the end-of-year festive season will be published on 23 December and 30 December 2020.<br><strong>We recommend using Johns Hopkins University dataset until we fix this.</strong>");
-        getCountries();
-        plotGraph();
     }
 });
 //Oxford University Blavatnik School of Government
@@ -111,33 +106,20 @@ Plotly.d3.csv(url3, function(data){
             document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Johns Hopkins University CSSE".replace(/\s+/g, '')));
         }
         if (error) {
-            removeLoadingFromButton("dataset3", "Johns Hopkins University CSSE", false, true);
+            removeLoadingFromButton("dataset1", "Johns Hopkins University CSSE", false, true);
             removeLoadingFromGraph(reportGraph);
             progressBar();
             alertRequestFail("Johns Hopkins University CSSE");
         }
         else {
             responseData4 = data;
-            removeLoadingFromButton("dataset3", "Johns Hopkins University CSSE", true);
+            removeLoadingFromButton("dataset1", "Johns Hopkins University CSSE", true);
             progressBar();
+            getCountries();
+            plotGraph();
         }
     });
 } );
-//Enhanced Data Request data.gouv.fr
-Plotly.d3.csv(url5, function(error, data){
-    responseEnhancedData2 = data;
-    if (document.getElementById("requestAlert" + "Enhanced Data from data.gouv.fr".replace(/\s+/g, ''))) {
-        document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Enhanced Data from data.gouv.fr".replace(/\s+/g, '')));
-    }
-    if (error) {
-        alertRequestFail("Enhanced Data from data.gouv.fr");
-    }
-    else {
-        responseEnhancedData2 = data;
-        modalGraphsData = enhancedDataExtractor();
-        modalGraphsColor = enhancedData(modalGraphsData);
-    }
-});
 //Events
 $(document).ready(function(){
     progressBar();
@@ -166,16 +148,6 @@ dataset2.on('click', function(){
     document.getElementById('France').setAttribute("value", "FRA");
     document.getElementById('France').innerHTML = "FRA &#x26A1";
     //alertDataset("dataset2", "<strong>From August, 6 to August, 19 2020</strong> Oxford University BSG has not sent any relevant data. This can result in catch-up effects with surprising high numbers of cases/deaths in one day. Similar events could recur periodically. <small><i>Click to close warning</i></small>");
-    getCountries();
-    country.dispatchEvent(autoInput);
-});
-
-dataset3.on('click', function(){
-    choiceDataset = dataset3.attr('id');
-    if (document.getElementById('France').getAttribute("value") != "France"){
-        document.getElementById('France').setAttribute("value", "France");
-        document.getElementById('France').innerHTML = "France &#x26A1";
-    }
     getCountries();
     country.dispatchEvent(autoInput);
 });
@@ -231,13 +203,6 @@ function getCountries(){
     let countries = [];
     var distinctCountries;
     switch (choiceDataset){
-        case 'dataset1':
-            for (let i in responseData1){
-                countries.push(responseData1[i]["countriesAndTerritories"]);
-            };
-            distinctCountries = [...new Set(countries)];
-            updateCountryList(distinctCountries);
-        break;
         case 'dataset2':
             for (let i in responseData2["countries"]){
                 countries.push(responseData2["countries"][i]);
@@ -245,7 +210,7 @@ function getCountries(){
             distinctCountries = [...new Set(countries)];
             updateCountryList(distinctCountries);
         break;
-        case 'dataset3':
+        case 'dataset1':
             for (let i in responseData3){
                 if (responseData3[i]["Province/State"]){
                     countries.push(responseData3[i]["Province/State"]);
@@ -619,17 +584,10 @@ function statsBar(mydata){
 function extractCountryData(){
     let covidData = [];
     switch (choiceDataset){
-        case 'dataset1':
-            for (let i in responseData1){
-                if (responseData1[i]["countriesAndTerritories"] == selectedCountry){
-                    covidData.push(responseData1[i]);
-                };
-            };
-        break;
         case 'dataset2':
             var i = 0;
             for (let date in responseData2["data"]){
-                if (responseData2["data"][date][selectedCountry] == undefined) {
+                if ((responseData2["data"][date][selectedCountry] == undefined) || (responseData2["data"][date][selectedCountry]["confirmed"] == null && i>0) || (responseData2["data"][date][selectedCountry]["deaths"] == null && i>0)) {
                     responseData2["data"][date][selectedCountry] = {
                         confirmed: covidData[i-1]["confirmed"],
                         country_code: selectedCountry,
@@ -641,7 +599,7 @@ function extractCountryData(){
                 i = i+1;
             };
         break;
-        case 'dataset3':
+        case 'dataset1':
             for (let i in responseData3){
                 if (responseData3[i]["Province/State"]){
                     if (responseData3[i]["Province/State"] == selectedCountry){
@@ -672,64 +630,20 @@ function dataToArray(data){
     let yDeathsCumulative = [];
 
     switch (choiceDataset) {
-        case 'dataset1':
-            for (let i in data) {
-                x.push(String(data[i]["year"])+"-"+String(data[i]["month"])+"-"+String(data[i]["day"]));
-        
-                yCases.push(data[i]["cases"]);
-        
-                if (i < data.length - 6){
-                    yCasesAvrg.push(computeAverage(data, i, 7, 'cases'))
-                } else {
-                    yCasesAvrg.push(NaN);
-                }
-        
-                yDeaths.push(data[i]["deaths"]);
-        
-                if (i < data.length - 6){
-                    yDeathsAvrg.push(computeAverage(data, i, 7, 'deaths'));
-                } else {
-                    yDeathsAvrg.push(NaN);
-                }   
-            };
-
-            x = x.reverse();
-            yCases = yCases.reverse();
-            yCasesAvrg = yCasesAvrg.reverse();
-            yDeaths = yDeaths.reverse();
-            yDeathsAvrg = yDeathsAvrg.reverse();
-        
-            var i = 0;
-            yCases.slice().forEach((c) => {
-                yCasesCumulative.push(i + parseInt(c));
-                i += parseInt(c);
-            });
-        
-            i = 0;
-            yDeaths.slice().forEach((d) => {
-                yDeathsCumulative.push(i + parseInt(d));
-                i += parseInt(d);
-            });
-
-        break;
         case 'dataset2':
             for (let i in data) {
                 x.push(data[i]["date_value"]);
-                
                 if (i > 0){
                     yCases.push(computeDerivative(data, i, "confirmed"));
                 } else {
                     yCases.push(data[i]["confirmed"]);
                 }
-
                 if (i > 0){
                     yDeaths.push(computeDerivative(data, i, "deaths"));
                 } else {
                     yDeaths.push(data[i]["deaths"]);
                 }
-
-                yCasesCumulative.push(data[i]["confirmed"]);
-                
+                yCasesCumulative.push(data[i]["confirmed"]);      
                 yDeathsCumulative.push(data[i]["deaths"]);
 
             }
@@ -746,7 +660,7 @@ function dataToArray(data){
                 }
             }
         break;
-        case 'dataset3':
+        case 'dataset1':
             const regex = /(\d{1,2}\/\d{1,2}\/\d{1,2})+/g;
             keys = Object.keys(data[0]);
             x = keys.filter(key => key.match(regex));
@@ -798,20 +712,13 @@ function dataToArray(data){
 
 function computeAverage(x, index, range, type) {
     switch (choiceDataset){
-        case 'dataset1':
-            return x.slice(
-                parseInt(index), parseInt(index) + range
-            )
-            .map(x => x[type])
-            .reduce((acc, val) => parseInt(acc) + parseInt(val))
-            / range
         case 'dataset2':
             return x.slice(
                 parseInt(index) - range + 1, parseInt(index) + 1
             )
             .reduce((acc, val) => acc + val)
             / range
-        case 'dataset3':
+        case 'dataset1':
             return x.slice(
                 parseInt(index) - range + 1, parseInt(index) + 1
             )
@@ -830,7 +737,7 @@ function computeDerivative(x, index, type) {
     switch (choiceDataset){
         case 'dataset2':
             return x[parseInt(index)][type] - x[parseInt(index)-1][type]
-        case 'dataset3':
+        case 'dataset1':
             return x[parseInt(index)] - x[parseInt(index)-1]
         default:
             console.log("Default in computeDerivative activated")
