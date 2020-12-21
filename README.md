@@ -22,8 +22,8 @@ Progressive Web App standard. You can install it on you desktop and your mobile 
 
 Select a country and get a nice graph of the daily new Covid-19 cases and deaths in this country. Moving average on 7 days to filter the data.
 
-Choose between three major wordwide datasets:
-- [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide).
+Choose between ~~three~~ two major wordwide datasets:
+- ~~[European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide).~~
 - [University of Oxford Blavatnik School of Govvernment](https://covidtracker.bsg.ox.ac.uk/)
 - [Johns Hopkins University Centre for Systems Science and Engineering](https://github.com/CSSEGISandData)
 
