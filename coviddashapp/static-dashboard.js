@@ -9,11 +9,14 @@ const url2 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetJSON/?u
 const url3 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
 const url4 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
 const url5 = "https://krusty.westeurope.cloudapp.azure.com/api/v2/FRcovidIndicators/";
+const url6 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/alerts";
+let responseData1;
 let responseData2;
 let responseData3;
 let responseData4;
 let responseEnhancedData;
 let responseEnhancedData2;
+let responseAlerts;
 let modalGraphsData;
 let modalGraphsColor;
 
@@ -60,6 +63,9 @@ const modalGraph1 = document.getElementById("incidenceRateGraph");
 const modalGraph2 = document.getElementById("R0Graph");
 const modalGraph3 = document.getElementById("ruOccupationRateGraph");
 const modalGraph4 = document.getElementById("positivityRateGraph");
+//Regular Expressions
+const score = /\/+/g;
+const regexDate = /(\d{1,2}\/\d{1,2}\/\d{1,2})+/g;
 
 //HTTP REQUESTS, FUNCTION CALLING AND EVENTS
 //Enhanced Data Request data.gouv.fr
@@ -78,25 +84,6 @@ Plotly.d3.csv(url5, function(error, data){
         modalGraphsColor = enhancedData(modalGraphsData);
         progressBar();
     }
-});
-//Oxford University Blavatnik School of Government
-$.ajax({
-    async: true,
-    url: url2 + dateOfEnd,
-    dataType: "json",
-    success: function(result){
-        if (document.getElementById("requestAlert" + "Oxford University BSG".replace(/\s+/g, ''))) {
-            document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Oxford University BSG".replace(/\s+/g, '')));
-        }
-        responseData2 = result;
-        removeLoadingFromButton("dataset2", "Oxford University BSG", true);
-        progressBar();
-    }
-}).fail(function(){
-    removeLoadingFromButton("dataset2", "Oxford University BSG", false, true);
-    removeLoadingFromGraph(reportGraph);
-    progressBar();
-    alertRequestFail("Oxford University BSG");
 });
 //Johns Hopkins University Centre for Science and System Engineering
 Plotly.d3.csv(url3, function(data){ 
@@ -119,7 +106,35 @@ Plotly.d3.csv(url3, function(data){
             plotGraph();
         }
     });
-} );
+});
+//European Centre for Disease Prevention and Control
+Plotly.d3.csv(url1, function(error, data){
+    if (document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, ''))) {
+        document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, '')));
+    }
+    if (error){
+        removeLoadingFromButton("dataset2", "European Centre for Disease Prevention and Control", false, true);
+        removeLoadingFromGraph(reportGraph);
+        progressBar();
+        alertRequestFail("European Centre for Disease Prevention and Control");
+    } 
+    else {
+        responseData1 = data;
+        removeLoadingFromButton("dataset2", "European Centre for Disease Prevention and Control", true);
+        progressBar();
+    }
+});
+//Check for alerts to be displayed
+$.ajax({
+    async: true,
+    url: url6,
+    dataType: "json",
+    success: function(result){
+        responseAlerts = result;
+    }
+}).fail(function(){
+    console.log('Unable to fetch alerts')
+});
 //Events
 $(document).ready(function(){
     progressBar();
@@ -128,8 +143,7 @@ $(document).ready(function(){
 country.addEventListener('input', function(){
     selectedCountry = country.value;
     modalGraphsColor = enhancedData(modalGraphsData);
-    //country warnings
-    //alertCountry(["United_Kingdom", "GBR"], "<strong>Note: </strong> On 3 July the UK announced an ongoing revision of historical data that lead to a negative number of new cases and an overall decrease in cases for the UK. <small><i>Click to close warning</i></small>");
+    displayAlert(responseAlerts);
     plotGraph();
 });
 
@@ -145,9 +159,10 @@ dataset1.on('click', function(){
 
 dataset2.on('click', function(){
     choiceDataset = dataset2.attr('id');
-    document.getElementById('France').setAttribute("value", "FRA");
-    document.getElementById('France').innerHTML = "FRA &#x26A1";
-    //alertDataset("dataset2", "<strong>From August, 6 to August, 19 2020</strong> Oxford University BSG has not sent any relevant data. This can result in catch-up effects with surprising high numbers of cases/deaths in one day. Similar events could recur periodically. <small><i>Click to close warning</i></small>");
+    if (document.getElementById('France').getAttribute("value") != "France"){
+        document.getElementById('France').setAttribute("value", "France");
+        document.getElementById('France').innerHTML = "France &#x26A1";
+    }
     getCountries();
     country.dispatchEvent(autoInput);
 });
@@ -155,7 +170,6 @@ dataset2.on('click', function(){
 casesButton.on('click', function(){
     choiceButton = casesButton.attr('id');
     plotGraph();
-
 });
 
 deathsButton.on('click', function(){
@@ -204,8 +218,8 @@ function getCountries(){
     var distinctCountries;
     switch (choiceDataset){
         case 'dataset2':
-            for (let i in responseData2["countries"]){
-                countries.push(responseData2["countries"][i]);
+            for (let i in responseData1){
+                countries.push(responseData1[i]["countriesAndTerritories"]);
             };
             distinctCountries = [...new Set(countries)];
             updateCountryList(distinctCountries);
@@ -242,6 +256,57 @@ function updateCountryList(distinctCountries){
         }
         elt.appendChild(newElt);
     };
+};
+
+function displayAlert(alertObject){
+    console.log("display alert activated");
+    for(let i in alertObject){
+        let messageHTML = alertObject[i].message;
+        let countryNames = alertObject[i].country;
+        let datasets = alertObject[i].dataset;
+
+        if (Array.isArray(countryNames)){
+            countryNames.forEach(function(country){
+            element = countryNames.shift();
+            countryNames.push(element.trim());
+            });
+        } else {
+            countryNames = [countryNames.trim()];
+        }
+        
+        if (Array.isArray(datasets)){
+            datasets.forEach(function(dataset){
+            element = countryNames.shift();
+            datasets.push(element.trim());
+            });
+        } else {
+            datasets = [datasets.trim()];
+        }
+        
+        if ((countryNames.some(name => (name == selectedCountry) || (name == "All"))) && (datasets.some(dataset => (dataset == choiceDataset) || (dataset == "All")) && document.getElementById("datasetAlert") == null)){
+            let alert = document.createElement("div")
+            document.getElementById('settings').appendChild(alert)
+            alert.setAttribute("class", "alert alert-warning alert-dismissible fade show mt-2");
+            alert.setAttribute("role", "alert");
+            alert.setAttribute("data-dismiss", "alert");
+            alert.setAttribute("id", "countryAlert")
+            alert.innerHTML = messageHTML + "<button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+            $('.alert').alert();
+        } else if (document.getElementById("countryAlert")) {
+            document.getElementById('settings').removeChild(document.getElementById("countryAlert"));
+
+            if (datasets.some(dataset => (dataset == choiceDataset) || (dataset == "All")) && document.getElementById("datasetAlert") == null){
+                let alert = document.createElement("div")
+                document.getElementById('settings').appendChild(alert)
+                alert.setAttribute("class", "alert alert-warning alert-dismissible fade show mt-2");
+                alert.setAttribute("role", "alert");
+                alert.setAttribute("data-dismiss", "alert");
+                alert.setAttribute("id", "datasetAlert")
+                alert.innerHTML = messageHTML + "<button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+                $('.alert').alert();
+            }
+        }
+    }
 };
 
 function alertCountry(countryNames, messageHTML){
@@ -315,7 +380,7 @@ function updateGraphSize(){
         modalGraph4.setAttribute("style", "width: auto; height: 70vh;");
     } else {
         reportGraph.setAttribute("style", "width: auto; height: 70vh;");
-        cumulativeGraph.setAttribute("style", "width: auto; height: 70vh;"); 
+        cumulativeGraph.setAttribute("style", "width: auto; height: 40vh;"); 
         modalGraph1.setAttribute("style", "width: auto; height: 50vh;");
         modalGraph2.setAttribute("style", "width: auto; height: 50vh;");
         modalGraph3.setAttribute("style", "width: auto; height: 50vh;");
@@ -364,36 +429,55 @@ function updateNumbers(mydata){
     let cumCases = mydata[5][end];
     let deaths = mydata[3][end];
     let cumDeaths = mydata[6][end];
-    let tendencyCases = mydata[2][end] - mydata[2][end - 1];
-    let tendencyDeaths = mydata[4][end] - mydata[4][end - 1];
+    let tendencyCases;
+    let tendencyDeaths;
+    let threshold;
+    if (choiceDataset == dataset1.attr('id')){
+        tendencyCases = mydata[2][end] - mydata[2][end - 1];
+        tendencyDeaths = mydata[4][end] - mydata[4][end - 1];
+        threshold = 1;
+    } else if (choiceDataset == dataset2.attr('id')){
+        tendencyCases = mydata[1][end] - mydata[1][end - 1];
+        tendencyDeaths = mydata[3][end] - mydata[3][end - 1];
+        threshold = 200;
+    }
+    
     document.getElementById('date1').innerText = 'Last reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
     document.getElementById('date2').innerText = 'Last reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
     let arrowCases;
-    if (tendencyCases > 0.1){
+    if (tendencyCases > threshold){
         arrowCases = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-up-right' fill='red' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M6.5 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V4.5H7a.5.5 0 0 1-.5-.5z'/><path fill-rule='evenodd' d='M12.354 3.646a.5.5 0 0 1 0 .708l-9 9a.5.5 0 0 1-.708-.708l9-9a.5.5 0 0 1 .708 0z'/></svg>";
-    } else if (tendencyCases < -0.1){
+    } else if (tendencyCases < -threshold){
         arrowCases = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-down-right' fill='green' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M12 7.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H7a.5.5 0 0 1 0-1h4.5V8a.5.5 0 0 1 .5-.5z'/><path fill-rule='evenodd' d='M2.646 3.646a.5.5 0 0 1 .708 0l9 9a.5.5 0 0 1-.708.708l-9-9a.5.5 0 0 1 0-.708z'/></svg>";
-    } else if (tendencyCases == 0){
+    } else {
         arrowCases = "";
     }
     let arrowDeaths;
-    if (tendencyDeaths > 0.1){
+    if (tendencyDeaths > threshold){
         arrowDeaths = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-up-right' fill='red' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M6.5 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V4.5H7a.5.5 0 0 1-.5-.5z'/><path fill-rule='evenodd' d='M12.354 3.646a.5.5 0 0 1 0 .708l-9 9a.5.5 0 0 1-.708-.708l9-9a.5.5 0 0 1 .708 0z'/></svg>";
-    } else if (tendencyDeaths < -0.1){
+    } else if (tendencyDeaths < -threshold){
         arrowDeaths = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-down-right' fill='green' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M12 7.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H7a.5.5 0 0 1 0-1h4.5V8a.5.5 0 0 1 .5-.5z'/><path fill-rule='evenodd' d='M2.646 3.646a.5.5 0 0 1 .708 0l9 9a.5.5 0 0 1-.708.708l-9-9a.5.5 0 0 1 0-.708z'/></svg>";
-    } else if (tendencyDeaths ==  0){
+    } else {
         arrowDeaths = "";
     }
     if (choiceButton == casesButton.attr('id')){
         nbDaily.innerHTML = Number(cases.toString()).toLocaleString('en-UK') + " " + arrowCases;
         nbCum.innerHTML = Number(cumCases.toString()).toLocaleString('en-UK');
-        document.getElementById('nbDailyHeader').innerText = "Daily New Cases";
+        if (choiceDataset == dataset1.attr('id')){
+            document.getElementById('nbDailyHeader').innerText = "Daily New Cases";
+        } else if (choiceDataset == dataset2.attr('id')){
+            document.getElementById('nbDailyHeader').innerText = "Weekly New Cases";
+        }
         document.getElementById('nbCumHeader').innerText = "Cumulative Number of Cases";
     }
     if (choiceButton == deathsButton.attr('id')){
         nbDaily.innerHTML = Number(deaths.toString()).toLocaleString('en-UK') + " " + arrowDeaths;
         nbCum.innerHTML = Number(cumDeaths.toString()).toLocaleString('en-UK');
-        document.getElementById('nbDailyHeader').innerText = "Daily New Deaths";
+        if (choiceDataset == dataset1.attr('id')){
+            document.getElementById('nbDailyHeader').innerText = "Daily New Deaths";
+        } else if (choiceDataset == dataset2.attr('id')){
+            document.getElementById('nbDailyHeader').innerText = "Weekly New Deaths";
+        }
         document.getElementById('nbCumHeader').innerText = "Cumulative Number of Deaths";
     }
 }
@@ -567,9 +651,15 @@ function modalGraphsPlot(graphData, graphColors, modalChoice){
 }
 
 function statsBar(mydata){
+    let end = mydata[0].length - 1;
     let cumCases = mydata[5];
     let cumDeaths = mydata[6][mydata[6].length - 1];
-    let casesOn7days = cumCases[cumCases.length -1] - cumCases[cumCases.length - 8];
+    let casesOn7days;
+    if (choiceDataset == dataset1.attr('id')){
+        casesOn7days = cumCases[cumCases.length -1] - cumCases[cumCases.length - 8];
+    } else if (choiceDataset == dataset2.attr('id')){
+        casesOn7days = mydata[1][end];
+    }
     let pourcentageDeaths = Math.round(cumDeaths*100/cumCases[cumCases.length-1]);
     let pourcentageCasesOn7days = Math.round(casesOn7days*100/cumCases[cumCases.length-1]);
     let pourcentageRecovered = 100 - pourcentageCasesOn7days - pourcentageDeaths;
@@ -585,18 +675,10 @@ function extractCountryData(){
     let covidData = [];
     switch (choiceDataset){
         case 'dataset2':
-            var i = 0;
-            for (let date in responseData2["data"]){
-                if ((responseData2["data"][date][selectedCountry] == undefined) || (responseData2["data"][date][selectedCountry]["confirmed"] == null && i>0) || (responseData2["data"][date][selectedCountry]["deaths"] == null && i>0)) {
-                    responseData2["data"][date][selectedCountry] = {
-                        confirmed: covidData[i-1]["confirmed"],
-                        country_code: selectedCountry,
-                        date_value: date,
-                        deaths: covidData[i-1]["deaths"]
-                    };
-                }
-                covidData.push(responseData2["data"][date][selectedCountry]);
-                i = i+1;
+            for (let i in responseData1){
+                if (responseData1[i]["countriesAndTerritories"] == selectedCountry){
+                    covidData.push(responseData1[i]);
+                };
             };
         break;
         case 'dataset1':
@@ -632,41 +714,41 @@ function dataToArray(data){
     switch (choiceDataset) {
         case 'dataset2':
             for (let i in data) {
-                x.push(data[i]["date_value"]);
-                if (i > 0){
-                    yCases.push(computeDerivative(data, i, "confirmed"));
-                } else {
-                    yCases.push(data[i]["confirmed"]);
-                }
-                if (i > 0){
-                    yDeaths.push(computeDerivative(data, i, "deaths"));
-                } else {
-                    yDeaths.push(data[i]["deaths"]);
-                }
-                yCasesCumulative.push(data[i]["confirmed"]);      
-                yDeathsCumulative.push(data[i]["deaths"]);
+                x.push(data[i]["dateRep"]);
+                x[i] = x[i].replace(score, "-");
+                let hash = x[i].split(/-/g);
+                x[i] = hash[2] + "-" + hash[1] + "-" + hash[0];
+                yCases.push(data[i]["cases_weekly"]);
+                yCasesAvrg.push(NaN);
+                yDeaths.push(data[i]["deaths_weekly"]);    
+                yDeathsAvrg.push(NaN);
+            };
 
-            }
-            for (let i in yCases) {
-                if (i > 6){
-                    yDeathsAvrg.push(computeAverage(yDeaths, i, 7, "deaths"));
-                } else {
-                    yDeathsAvrg.push(NaN);
-                }
-                if (i > 6){
-                    yCasesAvrg.push(computeAverage(yCases, i, 7, "confirmed"));
-                } else {
-                    yCasesAvrg.push(NaN);
-                }
-            }
+            x = x.reverse();
+
+            yCases = yCases.reverse();
+            yCasesAvrg = yCasesAvrg.reverse();
+            yDeaths = yDeaths.reverse();
+            yDeathsAvrg = yDeathsAvrg.reverse();
+        
+            var i = 0;
+            yCases.slice().forEach((c) => {
+                yCasesCumulative.push(i + parseInt(c));
+                i += parseInt(c);
+            });
+        
+            i = 0;
+            yDeaths.slice().forEach((d) => {
+                yDeathsCumulative.push(i + parseInt(d));
+                i += parseInt(d);
+            });
+
         break;
         case 'dataset1':
-            const regex = /(\d{1,2}\/\d{1,2}\/\d{1,2})+/g;
             keys = Object.keys(data[0]);
-            x = keys.filter(key => key.match(regex));
+            x = keys.filter(key => key.match(regexDate));
             x.forEach(key => yCasesCumulative.push(data[0][key]));
             x.forEach(key => yDeathsCumulative.push(data[1][key]));
-            const score = /\/+/g;
             for (let i in x){
                 x[i] = x[i].replace(score, "-");
                 let hash = x[i].split(/-/g);
@@ -714,9 +796,10 @@ function computeAverage(x, index, range, type) {
     switch (choiceDataset){
         case 'dataset2':
             return x.slice(
-                parseInt(index) - range + 1, parseInt(index) + 1
+                parseInt(index), parseInt(index) + range
             )
-            .reduce((acc, val) => acc + val)
+            .map(x => x[type])
+            .reduce((acc, val) => parseInt(acc) + parseInt(val))
             / range
         case 'dataset1':
             return x.slice(
@@ -734,18 +817,11 @@ function accumulate(a, b) {
 }
 
 function computeDerivative(x, index, type) {
-    switch (choiceDataset){
-        case 'dataset2':
-            return x[parseInt(index)][type] - x[parseInt(index)-1][type]
-        case 'dataset1':
-            return x[parseInt(index)] - x[parseInt(index)-1]
-        default:
-            console.log("Default in computeDerivative activated")
-    }
-    
+        return x[parseInt(index)] - x[parseInt(index)-1]
 }
 
 function plotGraph(){
+    console.log("plot graph activated");
     let covidData = extractCountryData();
     let mydata = dataToArray(covidData);
     updateNumbers(mydata);
@@ -778,15 +854,25 @@ function plotGraph(){
             line: {color: primarycolor}
         }
 
+        /*
         var trace4 = {
             type: 'scatter',
             mode: 'lines',
             name: 'Cumulative (log)',
             yaxis: 'y2',
             x: mydata[0],
-            y: mydata[5].map(x => Math.log(x)),
+            y: mydata[2].map(x => Math.log(x)),
             line: {color: secondarycolor}
         }
+
+        yaxis2: {
+                title: 'Number of cases (log scale)',
+                overlaying: 'y',
+                side: 'right',
+                fixedrange: true
+            },
+
+        */
 
         var layout1 = {
             title: 'Daily New Cases',
@@ -809,12 +895,6 @@ function plotGraph(){
             xaxis : {fixedrange: true},
             yaxis: {
                 title: 'Number of cases',
-                fixedrange: true
-            },
-            yaxis2: {
-                title: 'Number of cases (log scale)',
-                overlaying: 'y',
-                side: 'right',
                 fixedrange: true
             },
             legend: {
@@ -852,16 +932,24 @@ function plotGraph(){
             y: mydata[6],
             line: {color: thirdcolor}
         }
-
+        /*
         var trace4 = {
             type: 'scatter',
             mode: 'lines',
             name: 'Cumulative (log)',
             yaxis: 'y2',
             x: mydata[0],
-            y: mydata[6].map(x => Math.log(x)),
+            y: mydata[4].map(x => Math.log(x)),
             line: {color: secondarycolor}
         }
+
+        yaxis2: {
+                title: 'Number of deaths (log scale)',
+                overlaying: 'y',
+                side: 'right',
+                fixedrange: true
+            },
+        */
 
         var layout1 = {
             title: 'Daily New Deaths',
@@ -886,12 +974,6 @@ function plotGraph(){
                 title: 'Number of deaths',
                 fixedrange: true
             },
-            yaxis2: {
-                title: 'Number of deaths (log scale)',
-                overlaying: 'y',
-                side: 'right',
-                fixedrange: true
-            },
             legend: {
                 "orientation": "h",
                 x: 0.5,
@@ -906,7 +988,7 @@ function plotGraph(){
     }
 
     var reportData = [trace1, trace2];
-    var cumulativeData = [trace3, trace4];
+    var cumulativeData = [trace3];
     var config = { 
         responsive: true,
         displayModeBar: false 
