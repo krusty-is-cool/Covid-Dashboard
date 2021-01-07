@@ -1,11 +1,11 @@
-//WARNING: in production, replace /docs/ by /Covid-Dashboard/
-const staticCacheName = 'site-static-v16'; //Don't forget to change version when modifying one of the assets
-const dynamicCacheName = 'site-dynamic-v3';
+const dynamicCacheName = 'site-dynamic';
 const assets = [
     '/Covid-Dashboard/',
     '/Covid-Dashboard/index.html',
     '/Covid-Dashboard/app.js',
+    '/Covid-Dashboard/static-dashboard.js',
     '/Covid-Dashboard/site.webmanifest',
+    '/Covid-Dashboard/add_style.css',
     '/Covid-Dashboard/favicon/android-chrome-192x192.png',
     '/Covid-Dashboard/favicon/favicon-32x32.png',
     'https://cdn.plot.ly/plotly-latest.min.js',
@@ -14,6 +14,7 @@ const assets = [
     'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js'
 ];
 
+var version;
 var lastUpdate = 0;
 const interTime = 3600000;
 
@@ -31,9 +32,18 @@ const limitCacheSize = (name, size) => {
 //INSTALL SERVICE WORKER
 self.addEventListener('install', evt => {
     console.log('service worker has been installed');
+    version = fetch('https://krusty.westeurope.cloudapp.azure.com/api/v1/updates')
+        .then(response => response.json())
+        .then(data => {
+            let v = data["latest_version"];
+            return v
+        })
+    console.log(version);
     evt.waitUntil(
-        caches.open(staticCacheName).then(cache => {
-            cache.addAll(assets)
+        version.then(v => {
+            caches.open('site-static-v' + v).then(cache => {
+                cache.addAll(assets)
+            })
         })
     );
 });
@@ -41,12 +51,15 @@ self.addEventListener('install', evt => {
 //ACTIVATE EVENT
 self.addEventListener('activate', evt => {
     console.log('service worker has been activated');
+    //Check for update
     evt.waitUntil(
-        caches.keys().then(keys => {
-            return Promise.all(keys
-                .filter(key => key !== staticCacheName && key !== dynamicCacheName)
-                .map(key => caches.delete(key))
-            )
+        version.then(v => {
+            caches.keys().then(keys => {
+                return Promise.all(keys
+                    .filter(key => key !== ("site-static-v" + v))
+                    .map(key => caches.delete(key))
+                )
+            })
         })
     );
 });
@@ -55,11 +68,28 @@ self.addEventListener('activate', evt => {
 self.addEventListener('fetch', evt => {
     var now = Date.now();
     if (now - lastUpdate > interTime){
-         caches.open(dynamicCacheName).then(cache => {
-             cache.keys().then(keys => {
-                 keys.forEach(request => cache.delete(request));
-             })
-         })      
+        caches.open(dynamicCacheName).then(cache => {
+            cache.keys().then(keys => {
+                keys.forEach(request => cache.delete(request));
+            })
+        })
+        version = fetch('https://krusty.westeurope.cloudapp.azure.com/api/v1/updates')
+        .then(response => response.json())
+        .then(data => {
+            let v = data["latest_version"];
+            return v
+        })
+        .then(v => {
+            caches.keys().then(keys => {
+                return Promise.all(keys
+                    .filter(key => key !== ("site-static-v" + v))
+                    .map(key => caches.delete(key))
+                )
+            })
+            caches.open('site-static-v' + v).then(cache => {
+                cache.addAll(assets)
+            })
+        })
     }
     evt.respondWith(
         caches.match(evt.request).then(cacheRes => {
