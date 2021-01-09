@@ -5,11 +5,13 @@
 const today = new Date();
 const dateOfEnd = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
 const url1 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetCSV/?url=https://opendata.ecdc.europa.eu/covid19/casedistribution/csv";
+const url2 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetJSON/?url=https://covidtrackerapi.bsg.ox.ac.uk/api/v2/stringency/date-range/2020-01-02/";
 const url3 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
 const url4 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
 const url5 = "https://krusty.westeurope.cloudapp.azure.com/api/v2/FRcovidIndicators/";
 const url6 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/alerts";
 let responseData1;
+let responseData2;
 let responseData3;
 let responseData4;
 let responseEnhancedData;
@@ -30,9 +32,9 @@ const fourthcolor = "#28a745";
 //list of countries
 const elt = document.getElementById("countryList");
 //dataset buttons
-const dataset1 = document.getElementById('dataset1');
-const dataset2 = document.getElementById('dataset2');
-let choiceDataset = dataset1.id;
+const dataset1 = $('#dataset1');
+const dataset2 = $('#dataset2');
+let choiceDataset = dataset1.attr('id');
 //cases/deaths buttons
 const casesButton = $('#cases-button');
 const deathsButton = $('#deaths-button');
@@ -91,14 +93,14 @@ Plotly.d3.csv(url3, function(data){
             document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Johns Hopkins University CSSE".replace(/\s+/g, '')));
         }
         if (error) {
-            removeLoadingFromButton("buttonDataset1", "Johns Hopkins University CSSE", false, true);
+            removeLoadingFromButton("dataset1", "Johns Hopkins University CSSE", false, true);
             removeLoadingFromGraph(reportGraph);
             progressBar();
             alertRequestFail("Johns Hopkins University CSSE");
         }
         else {
             responseData4 = data;
-            removeLoadingFromButton("buttonDataset1", "Johns Hopkins University CSSE", true);
+            removeLoadingFromButton("dataset1", "Johns Hopkins University CSSE", true);
             progressBar();
             getCountries();
             plotGraph();
@@ -111,14 +113,14 @@ Plotly.d3.csv(url1, function(error, data){
         document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "European Centre for Disease Prevention and Control".replace(/\s+/g, '')));
     }
     if (error){
-        removeLoadingFromButton("buttonDataset2", "European Centre for Disease Prevention and Control", false, true);
+        removeLoadingFromButton("dataset2", "European Centre for Disease Prevention and Control", false, true);
         removeLoadingFromGraph(reportGraph);
         progressBar();
         alertRequestFail("European Centre for Disease Prevention and Control");
     } 
     else {
         responseData1 = data;
-        removeLoadingFromButton("buttonDataset2", "European Centre for Disease Prevention and Control", true);
+        removeLoadingFromButton("dataset2", "European Centre for Disease Prevention and Control", true);
         progressBar();
     }
 });
@@ -145,8 +147,8 @@ country.addEventListener('input', function(){
     plotGraph();
 });
 
-dataset1.addEventListener('click', function(){
-    choiceDataset = dataset1.id;
+dataset1.on('click', function(){
+    choiceDataset = dataset1.attr('id');
     if (document.getElementById('France').getAttribute("value") != "France"){
         document.getElementById('France').setAttribute("value", "France");
         document.getElementById('France').innerHTML = "France &#x26A1";
@@ -155,8 +157,8 @@ dataset1.addEventListener('click', function(){
     country.dispatchEvent(autoInput);
 });
 
-dataset2.addEventListener('click', function(){
-    choiceDataset = dataset2.id;
+dataset2.on('click', function(){
+    choiceDataset = dataset2.attr('id');
     if (document.getElementById('France').getAttribute("value") != "France"){
         document.getElementById('France').setAttribute("value", "France");
         document.getElementById('France').innerHTML = "France &#x26A1";
@@ -217,7 +219,7 @@ function getCountries(){
     switch (choiceDataset){
         case 'dataset2':
             for (let i in responseData1){
-                countries.push(responseData1[i]["countriesAndTerritories"].replaceAll('_', ' '));
+                countries.push(responseData1[i]["countriesAndTerritories"]);
             };
             distinctCountries = [...new Set(countries)];
             updateCountryList(distinctCountries);
@@ -254,21 +256,14 @@ function updateCountryList(distinctCountries){
         }
         elt.appendChild(newElt);
     };
-    if (distinctCountries.some(country => (country == selectedCountry)) && selectedCountry != "France"){
-        document.getElementById("France").removeAttribute("selected");
-        document.querySelector("#countryList > option[value='" + selectedCountry + "']").setAttribute("selected", "");
-    }
 };
 
 function displayAlert(alertObject){
-
+    console.log("display alert activated");
     for(let i in alertObject){
         let messageHTML = alertObject[i].message;
-        messageHTML = messageHTML.replaceAll("Warning!", "<b>Warning!</b>");
-        messageHTML = messageHTML.replaceAll("Note:", "<b>Note:</b>");
         let countryNames = alertObject[i].country;
         let datasets = alertObject[i].dataset;
-        let selectedCountryAlert = selectedCountry + "Alert";
 
         if (Array.isArray(countryNames)){
             countryNames.forEach(function(country){
@@ -288,42 +283,27 @@ function displayAlert(alertObject){
             datasets = [datasets.trim()];
         }
         
-        if (countryNames.some(name => (name == selectedCountry))){
+        if ((countryNames.some(name => (name == selectedCountry) || (name == "All"))) && (datasets.some(dataset => (dataset == choiceDataset) || (dataset == "All")) && document.getElementById("datasetAlert") == null)){
+            let alert = document.createElement("div")
+            document.getElementById('settings').appendChild(alert)
+            alert.setAttribute("class", "alert alert-warning alert-dismissible fade show mt-2");
+            alert.setAttribute("role", "alert");
+            alert.setAttribute("data-dismiss", "alert");
+            alert.setAttribute("id", "countryAlert")
+            alert.innerHTML = messageHTML + "<button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
+            $('.alert').alert();
+        } else if (document.getElementById("countryAlert")) {
+            document.getElementById('settings').removeChild(document.getElementById("countryAlert"));
 
-            if (document.getElementById(selectedCountryAlert) == null){
-
+            if (datasets.some(dataset => (dataset == choiceDataset) || (dataset == "All")) && document.getElementById("datasetAlert") == null){
                 let alert = document.createElement("div")
                 document.getElementById('settings').appendChild(alert)
                 alert.setAttribute("class", "alert alert-warning alert-dismissible fade show mt-2");
                 alert.setAttribute("role", "alert");
                 alert.setAttribute("data-dismiss", "alert");
-                alert.setAttribute("id", selectedCountryAlert)
+                alert.setAttribute("id", "datasetAlert")
                 alert.innerHTML = messageHTML + "<button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
                 $('.alert').alert();
-            }
-            
-        } else {
-
-            if (document.getElementById(selectedCountryAlert)) {
-                document.getElementById('settings').removeChild(document.getElementById(selectedCountryAlert));
-            }
-
-            if (datasets.some(dataset => (dataset == choiceDataset) || (dataset == "All"))){
-
-                if (document.getElementById("datasetAlert") == null){
-
-                    let alert = document.createElement("div")
-                    document.getElementById('settings').appendChild(alert)
-                    alert.setAttribute("class", "alert alert-warning alert-dismissible fade show mt-2");
-                    alert.setAttribute("role", "alert");
-                    alert.setAttribute("data-dismiss", "alert");
-                    alert.setAttribute("id", "datasetAlert")
-                    alert.innerHTML = messageHTML + "<button type='button' class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button>";
-                    $('.alert').alert();
-                }
-
-            } else if (document.getElementById("datasetAlert")){
-                document.getElementById('settings').removeChild(document.getElementById("datasetAlert"));
             }
         }
     }
@@ -409,15 +389,21 @@ function updateGraphSize(){
 }
 
 function removeLoadingFromButton(parentID, text, enable, error){
+    let newElt = document.createElement('input');
     if (enable == true){
         document.getElementById(parentID).removeAttribute("disabled");
     }
     if (error){
         document.getElementById(parentID).innerHTML = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-exclamation-triangle-fill' fill='currentColor' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 5zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z'/></svg> " + text;
     } else {
-        document.getElementById(parentID).removeChild(document.querySelector("#" + parentID + " > span.spinner-border"));
-        document.querySelector("#" + parentID + " > span").innerText = text;
+        document.getElementById(parentID).textContent = text;
     }
+    newElt.setAttribute("type", "radio");
+    newElt.setAttribute("name", "datasets");
+    if (parentID == "dataset1"){
+        newElt.setAttribute("checked", "");
+    }
+    document.getElementById(parentID).appendChild(newElt);
 }
 
 function removeLoadingFromGraph(parentElement){
@@ -446,11 +432,11 @@ function updateNumbers(mydata){
     let tendencyCases;
     let tendencyDeaths;
     let threshold;
-    if (choiceDataset == dataset1.id){
+    if (choiceDataset == dataset1.attr('id')){
         tendencyCases = mydata[2][end] - mydata[2][end - 1];
         tendencyDeaths = mydata[4][end] - mydata[4][end - 1];
         threshold = 1;
-    } else if (choiceDataset == dataset2.id){
+    } else if (choiceDataset == dataset2.attr('id')){
         tendencyCases = mydata[1][end] - mydata[1][end - 1];
         tendencyDeaths = mydata[3][end] - mydata[3][end - 1];
         threshold = 200;
@@ -477,9 +463,9 @@ function updateNumbers(mydata){
     if (choiceButton == casesButton.attr('id')){
         nbDaily.innerHTML = Number(cases.toString()).toLocaleString('en-UK') + " " + arrowCases;
         nbCum.innerHTML = Number(cumCases.toString()).toLocaleString('en-UK');
-        if (choiceDataset == dataset1.id){
+        if (choiceDataset == dataset1.attr('id')){
             document.getElementById('nbDailyHeader').innerText = "Daily New Cases";
-        } else if (choiceDataset == dataset2.id){
+        } else if (choiceDataset == dataset2.attr('id')){
             document.getElementById('nbDailyHeader').innerText = "Weekly New Cases";
         }
         document.getElementById('nbCumHeader').innerText = "Cumulative Number of Cases";
@@ -487,9 +473,9 @@ function updateNumbers(mydata){
     if (choiceButton == deathsButton.attr('id')){
         nbDaily.innerHTML = Number(deaths.toString()).toLocaleString('en-UK') + " " + arrowDeaths;
         nbCum.innerHTML = Number(cumDeaths.toString()).toLocaleString('en-UK');
-        if (choiceDataset == dataset1.id){
+        if (choiceDataset == dataset1.attr('id')){
             document.getElementById('nbDailyHeader').innerText = "Daily New Deaths";
-        } else if (choiceDataset == dataset2.id){
+        } else if (choiceDataset == dataset2.attr('id')){
             document.getElementById('nbDailyHeader').innerText = "Weekly New Deaths";
         }
         document.getElementById('nbCumHeader').innerText = "Cumulative Number of Deaths";
@@ -669,9 +655,9 @@ function statsBar(mydata){
     let cumCases = mydata[5];
     let cumDeaths = mydata[6][mydata[6].length - 1];
     let casesOn7days;
-    if (choiceDataset == dataset1.id){
+    if (choiceDataset == dataset1.attr('id')){
         casesOn7days = cumCases[cumCases.length -1] - cumCases[cumCases.length - 8];
-    } else if (choiceDataset == dataset2.id){
+    } else if (choiceDataset == dataset2.attr('id')){
         casesOn7days = mydata[1][end];
     }
     let pourcentageDeaths = Math.round(cumDeaths*100/cumCases[cumCases.length-1]);
@@ -835,7 +821,7 @@ function computeDerivative(x, index, type) {
 }
 
 function plotGraph(){
-    
+    console.log("plot graph activated");
     let covidData = extractCountryData();
     let mydata = dataToArray(covidData);
     updateNumbers(mydata);
