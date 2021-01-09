@@ -20,19 +20,17 @@ Progressive Web App standard. You can install it on you desktop and your mobile 
 
 ### Features
 
-Select a country and get a nice graph of the daily new Covid-19 cases and deaths in this country. Moving average on 7 days to filter the data.
+Select a country and get a nice graph of the daily/weekly new Covid-19 cases and deaths in this country. Moving average on 7 days to filter the data.
 
 Choose between ~~three~~ two major wordwide datasets:
-- ~~[European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide).~~
-- [University of Oxford Blavatnik School of Govvernment](https://covidtracker.bsg.ox.ac.uk/)
+- [European Centre for Disease Prevention and Control](https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide).
+- ~~[University of Oxford Blavatnik School of Govvernment](https://covidtracker.bsg.ox.ac.uk/)~~
 - [Johns Hopkins University Centre for Systems Science and Engineering](https://github.com/CSSEGISandData)
 
 Default country: France. Need to study the possibility to set default country depending on user's location.
 
 **Enhanced Data** for France. Get 4 indicators of the epidemiological activity. Source: [data.gouv.fr](https://www.data.gouv.fr/en/datasets/indicateurs-de-suivi-de-lepidemie-de-covid-19/)
 
-Warnings (not exhaustive):
-> Note: On 3 July the  UK announced an ongoing revision of historical data that lead to a negative number of new cases and an overall decrease in cases for the UK.
 
 ### Screenshots *(desktop)*
 
