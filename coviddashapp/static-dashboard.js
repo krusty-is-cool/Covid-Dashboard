@@ -458,6 +458,7 @@ function updateNumbers(mydata){
     
     document.getElementById('date1').innerText = 'Last reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
     document.getElementById('date2').innerText = 'Last reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
+
     let arrowCases;
     if (tendencyCases > threshold){
         arrowCases = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-arrow-up-right' fill='red' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M6.5 4a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V4.5H7a.5.5 0 0 1-.5-.5z'/><path fill-rule='evenodd' d='M12.354 3.646a.5.5 0 0 1 0 .708l-9 9a.5.5 0 0 1-.708-.708l9-9a.5.5 0 0 1 .708 0z'/></svg>";
@@ -690,7 +691,7 @@ function extractCountryData(){
     switch (choiceDataset){
         case 'dataset2':
             for (let i in responseData1){
-                if (responseData1[i]["countriesAndTerritories"] == selectedCountry){
+                if (responseData1[i]["countriesAndTerritories"] == selectedCountry.replaceAll(' ', '_')){
                     covidData.push(responseData1[i]);
                 };
             };
@@ -712,7 +713,6 @@ function extractCountryData(){
             alert("Sorry, an unexpected error occured.");
         break;
     };
-
     return covidData;
 };
 
