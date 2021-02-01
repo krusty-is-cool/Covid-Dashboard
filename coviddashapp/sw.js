@@ -98,7 +98,7 @@ self.addEventListener('fetch', evt => {
             return cacheRes || fetch(evt.request).then(fetchRes => {
                 return caches.open(dynamicCacheName).then(cache => {
                     cache.put(evt.request.url, fetchRes.clone());
-                    limitCacheSize(dynamicCacheName, 5);
+                    limitCacheSize(dynamicCacheName, 3);
                     lastUpdate = Date.now();
                     return fetchRes;
                 })
