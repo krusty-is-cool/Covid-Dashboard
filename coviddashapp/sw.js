@@ -2,7 +2,7 @@ const dynamicCacheName = 'site-dynamic';
 const assets = [
     '/',
     '/index.html',
-    '/js/app.js',
+    '/app.js',
     '/js/static-dashboard.js',
     '/site.webmanifest',
     '/css/add_style.css',
@@ -98,7 +98,7 @@ self.addEventListener('fetch', evt => {
             return cacheRes || fetch(evt.request).then(fetchRes => {
                 return caches.open(dynamicCacheName).then(cache => {
                     cache.put(evt.request.url, fetchRes.clone());
-                    limitCacheSize(dynamicCacheName, 3);
+                    limitCacheSize(dynamicCacheName, 5);
                     lastUpdate = Date.now();
                     return fetchRes;
                 })
