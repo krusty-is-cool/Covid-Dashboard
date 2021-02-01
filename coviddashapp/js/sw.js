@@ -1,22 +1,24 @@
 const dynamicCacheName = 'site-dynamic';
 const assets = [
-    '/docs/',
-    '/docs/index.html',
-    '/docs/app.js',
-    '/docs/static-dashboard.js',
-    '/docs/site.webmanifest',
-    '/docs/add_style.css',
-    '/docs/favicon/android-chrome-192x192.png',
-    '/docs/favicon/favicon-32x32.png',
-    'https://cdn.plot.ly/plotly-latest.min.js',
-    'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css',
-    'https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js',
-    'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js'
+    '/',
+    '/index.html',
+    '/js/app.js',
+    '/js/static-dashboard.js',
+    '/site.webmanifest',
+    '/css/add_style.css',
+    '/favicon/android-chrome-192x192.png',
+    '/favicon/favicon-32x32.png',
+    '/js/d3.min.js',
+    '/js/billboard.min.js',
+    '/css/main_style.css',
+    '/css/billboard.min.css',
+    '/js/bootstrap.bundle.min.js',
+    '/js/bootstrap.bundle.min.js.map'
 ];
 
 var version;
 var lastUpdate = 0;
-const interTime = 3600000;
+const interTime = 1800000;
 
 //Cache size limit function
 const limitCacheSize = (name, size) => {
@@ -96,7 +98,7 @@ self.addEventListener('fetch', evt => {
             return cacheRes || fetch(evt.request).then(fetchRes => {
                 return caches.open(dynamicCacheName).then(cache => {
                     cache.put(evt.request.url, fetchRes.clone());
-                    limitCacheSize(dynamicCacheName, 4);
+                    limitCacheSize(dynamicCacheName, 5);
                     lastUpdate = Date.now();
                     return fetchRes;
                 })
