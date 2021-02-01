@@ -1,0 +1,55 @@
+.card-enhanced{
+    transition: .3s transform cubic-bezier(.155,1.105,.295,1.12),.3s;
+    cursor: pointer;
+}
+
+img.emoji {
+    height: 1em;
+    width: 1em;
+    margin: 0 .05em 0 .1em;
+    vertical-align: -0.1em;
+}
+
+.dropdown-scroll{
+    max-height:400px;
+    overflow-y:auto;
+}
+
+.colored{
+    color:#6e84a3;
+}
+
+.colored-black{
+    color: #0d1c2f;
+}
+
+.card-enhanced:hover{
+    transform: scale(1.02);
+}
+
+.bb-tooltip td {
+    color: #222;
+}
+
+#graph1 .line-thicker {
+    stroke-width: 2px;
+}
+
+.graph{
+    max-height: 80vh;
+}
+
+.graph-small{
+    width: 80px;
+    height: 42px;
+}
+
+.graph-modal{
+    max-height: 80vh;
+}
+
+@media (min-width: 1400px) {
+    .row.custom-row {
+        column-count: 2;
+    }
+}

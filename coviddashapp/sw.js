@@ -3,15 +3,17 @@ const assets = [
     '/',
     '/index.html',
     '/app.js',
-    '/static-dashboard.js',
+    '/js/static-dashboard.js',
     '/site.webmanifest',
-    '/add_style.css',
+    '/css/add_style.css',
     '/favicon/android-chrome-192x192.png',
     '/favicon/favicon-32x32.png',
-    'https://cdn.plot.ly/plotly-latest.min.js',
-    'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css',
-    'https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js',
-    'https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js'
+    '/js/d3.min.js',
+    '/js/billboard.min.js',
+    '/css/main_style.css',
+    '/css/billboard.min.css',
+    '/js/bootstrap.bundle.min.js',
+    '/js/bootstrap.bundle.min.js.map'
 ];
 
 var version;
