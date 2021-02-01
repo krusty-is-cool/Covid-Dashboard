@@ -35,6 +35,6 @@ Default country: France. Need to study the possibility to set default country de
 
 ### Screenshots *(desktop)*
 
-![Desktop view](img/desktop_view_v3.PNG)
-![Modal view for enhanced data](img/modal_view_v3.PNG)
-![Search through list of country](img/search_view_v3.PNG)
+![Desktop view](img/desktop_view_v3.png)
+![Modal view for enhanced data](img/modal_view_v3.png)
+![Search through list of country](img/search_view_v3.png)
