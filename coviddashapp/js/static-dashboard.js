@@ -5,8 +5,8 @@
 const today = new Date();
 const dateOfEnd = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
 const url1 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetCSV/?url=https://opendata.ecdc.europa.eu/covid19/casedistribution/csv";
-const url3 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv";
-const url4 = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv";
+const url3 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/covid19/jhcsse?dataset=cases";
+const url4 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/covid19/jhcsse?dataset=deaths";
 const url5 = "https://krusty.westeurope.cloudapp.azure.com/api/v2/FRcovidIndicators/";
 const url6 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/alerts";
 let responseData1 = [];
@@ -47,6 +47,8 @@ let selectedCountry = "France";
 document.getElementById("displayCountry").innerText = selectedCountry;
 //search form
 const searchForm = document.getElementById("searchCountry");
+//Dropdown menu selector with keyboard
+let selector = null;
 //graphs
 const reportGraph = document.getElementById('report');
 const cumulativeGraph = document.getElementById('cumulative');
@@ -61,12 +63,20 @@ const statsBarDeaths = document.getElementById('statsBarDeaths');
 //Regular Expressions
 const score = /\/+/g;
 const regexDate = /(\d{1,2}\/\d{1,2}\/\d{1,2})+/g;
+const regexProvinceState = new RegExp("_(?=[A-Za-z])");
 //Graph 1 Settings
+const graph1Log = document.getElementById("graph1Log");
 const graph1Cases = document.getElementById("graph1Settings1");
 const graph1Deaths = document.getElementById("graph1Settings2");
+const graph1Raw = document.getElementById("graph1Settings3");
+const graph1Filter1 = document.getElementById("graph1Settings4");
+const graph1Filter2 = document.getElementById("graph1Settings5");
 //Graph 2 Settings
+const graph2Log = document.getElementById("graph2Log");
 const graph2Cases = document.getElementById("graph2Settings1");
 const graph2Deaths = document.getElementById("graph2Settings2");
+const graph2Raw = document.getElementById("graph2Settings3");
+const graph2Filter = document.getElementById("graph2Settings4");
 
 //HTTP REQUESTS, FUNCTION CALLING AND EVENTS
 //Enhanced Data Request data.gouv.fr
@@ -150,24 +160,67 @@ ready(event => {
 dataset1.addEventListener('click', function(){
     choiceDataset = dataset1.id;
     listOfCountries = getCountries();
+    if (listOfCountries.some(country => (country == selectedCountry))){
+        displayAlert(responseAlerts);
+        display = displayCountryData();
+    } else {
+        selectedCountry = "France"
+        document.getElementById("displayCountry").innerText = selectedCountry;
+        displayAlert(responseAlerts);
+        display = displayCountryData();
+    }
     document.getElementById("graph1SettingsGroup").setAttribute("class", "col-auto align-self-center");
     document.getElementById("graph2SettingsGroup").setAttribute("class", "col-auto align-self-center");
+    graph1Cases.checked = true;
+    graph1Log.checked = false;
+    graph2Cases.checked = true;
+    graph2Log.checked = false;
+    graph1Raw.checked = true;
+    graph2Raw.checked = true;
 });
 
 dataset2.addEventListener('click', function(){
     choiceDataset = dataset2.id;
     listOfCountries = getCountries();
+    if (listOfCountries.some(country => (country == selectedCountry))){
+        displayAlert(responseAlerts);
+        display = displayCountryData();
+    } else {
+        selectedCountry = "France"
+        document.getElementById("displayCountry").innerText = selectedCountry;
+        displayAlert(responseAlerts);
+        display = displayCountryData();
+    }
     document.getElementById("graph1SettingsGroup").setAttribute("class", "col-auto align-self-center d-none");
     document.getElementById("graph2SettingsGroup").setAttribute("class", "col-auto align-self-center d-none");
+    graph1Cases.checked = true;
+    graph1Log.checked = false;
+    graph2Cases.checked = true;
+    graph2Log.checked = false;
+    graph1Raw.checked = true;
+    graph2Raw.checked = true;
 });
 
 document.querySelector("#settings .dropdown").addEventListener('hidden.bs.dropdown', function(){
         searchForm.value = "";
         updateCountryList(listOfCountries);
+        selector = null;
+})
+
+document.querySelector("#settings .dropdown").addEventListener('shown.bs.dropdown', function(){
+    searchForm.focus();
 })
 
 refreshButton.addEventListener('click', function(){
     document.location.reload(false);
+})
+
+graph1Log.addEventListener('click', function(){
+    if (graph1Cases.checked == true){
+
+    } else if (graph1Deaths == true){
+ 
+    }
 })
 
 graph1Cases.addEventListener('click', function(){
@@ -175,6 +228,7 @@ graph1Cases.addEventListener('click', function(){
         case 'dataset1':
             chart1.destroy();
             chart1 = plotTimeseriesYGraph("graph1", display.xdata, display.cases_raw, true, display.cases_mvavg);
+            graph1Raw.checked = true;
         break;
         case 'dataset2':
             chart1.destroy();
@@ -188,6 +242,7 @@ graph1Deaths.addEventListener('click', function(){
         case 'dataset1':
             chart1.destroy();
             chart1 = plotTimeseriesYGraph("graph1", display.xdata, display.deaths_raw, true, display.deaths_mvavg);
+            graph1Raw.checked = true;
         break;
         case 'dataset2':
             chart1.destroy();
@@ -196,14 +251,78 @@ graph1Deaths.addEventListener('click', function(){
     }
 })
 
+graph1Raw.addEventListener('click', function(){
+    if (choiceDataset == 'dataset1'){
+        if (graph1Cases.checked == true){
+            chart1.load(Object.assign(display.cases_mvavg, {unload: ["cases_filter1", "cases_filter2"]}))
+        } else if (graph1Deaths.checked == true) {
+            chart1.load(Object.assign(display.deaths_mvavg, {unload: ["deaths_filter1", "deaths_filter2"]}))
+        }
+    }
+})
+
+graph1Filter1.addEventListener('click', function(){
+    if (choiceDataset == 'dataset1'){
+        if (graph1Cases.checked == true){
+            chart1.load(Object.assign(display.cases_filter1, {unload: ["cases_mvavg", "cases_filter2"]}))
+        } else if (graph1Deaths.checked == true) {
+            chart1.load(Object.assign(display.deaths_filter1, {unload: ["deaths_mvavg", "deaths_filter2"]}))
+        }    
+    }
+})
+
+graph1Filter2.addEventListener('click', function(){
+    if (choiceDataset == 'dataset1'){
+        if (graph1Cases.checked == true){
+            chart1.load(Object.assign(display.cases_filter2, {unload: ["cases_filter1", "cases_mvavg"]}))
+        } else if (graph1Deaths.checked == true) {
+            chart1.load(Object.assign(display.deaths_filter2, {unload: ["deaths_filter1", "deaths_mvavg"]}))
+        }
+    }
+})
+
+graph2Log.addEventListener('click', function(){
+    if (graph2Cases.checked == true){
+ 
+    } else if (graph2Deaths.checked == true){
+ 
+    }
+})
+
 graph2Cases.addEventListener('click', function(){
     chart2.destroy();
     chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.cases_cum_raw, false);
+    graph2Raw.checked = true;
 })
 
 graph2Deaths.addEventListener('click', function(){
     chart2.destroy();
     chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.deaths_cum_raw, false);
+    graph2Raw.checked = true;
+})
+
+graph2Raw.addEventListener('click', function(){
+    if (choiceDataset == 'dataset1'){
+        if (graph2Cases.checked == true){
+            chart2.destroy();
+            chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.cases_cum_raw, false);
+        } else if (graph2Deaths.checked == true) {
+            chart2.destroy();
+            chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.deaths_cum_raw, false);
+        }
+    }
+})
+
+graph2Filter.addEventListener('click', function(){
+    if (choiceDataset == 'dataset1'){
+        if (graph2Cases.checked == true){
+            chart2.destroy();
+            chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.cases_cum_filter, false);
+        } else if (graph2Deaths.checked == true) {
+            chart2.destroy();
+            chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.deaths_cum_filter, false);
+        }    
+    }
 })
 
 window.addEventListener('offline', function(){
@@ -214,27 +333,36 @@ window.addEventListener('online', function(){
     onlineMode();
 });
 
-searchForm.addEventListener('keyup', function(){
+searchForm.addEventListener('input', function(){
     if (searchForm.value.length > 0){
         while (document.querySelector("#countryList li")){
             countryList.removeChild(document.querySelector("#countryList li"));
         };
         listOfCountries.forEach(function(currentValue){
-            if (currentValue.toLowerCase().startsWith(searchForm.value.toLowerCase())){
+            if (currentValue.replace("_", "").toLowerCase().startsWith(searchForm.value.toLowerCase())){
                 let newElt1 = document.createElement('li');
                 let newElt2 = document.createElement('a');
                 newElt2.setAttribute("href", "#");
-                newElt2.setAttribute("name", currentValue)
-                if (currentValue == selectedCountry){
-                    newElt2.setAttribute("class", "dropdown-item active");
-                }
-                else {
-                    newElt2.setAttribute("class", "dropdown-item");
+                newElt2.setAttribute("name", currentValue.replace("_", ""))
+                if (regexProvinceState.test(currentValue)){
+                    if (currentValue == selectedCountry){
+                        newElt2.setAttribute("class", "dropdown-item active fst-italic fw-light");
+                    }
+                    else {
+                        newElt2.setAttribute("class", "dropdown-item fst-italic fw-light");
+                    }
+                } else {
+                    if (currentValue == selectedCountry){
+                        newElt2.setAttribute("class", "dropdown-item active");
+                    }
+                    else {
+                        newElt2.setAttribute("class", "dropdown-item");
+                    }
                 }
                 if (currentValue == "France" || currentValue == "FRA"){
                     newElt2.innerHTML = currentValue + " &#x26A1";
                 } else {
-                    newElt2.innerHTML = currentValue;
+                    newElt2.innerHTML = currentValue.replace("_", "");
                 }
                 countryList.appendChild(newElt1);
                 newElt1.appendChild(newElt2);
@@ -247,6 +375,10 @@ searchForm.addEventListener('keyup', function(){
                     displayAlert(responseAlerts);
                     display = displayCountryData();
                     searchForm.value = '';
+                    graph1Cases.checked = true;
+                    graph1Raw.checked = true;
+                    graph2Cases.checked = true;
+                    graph2Raw.checked = true;
                 })
             }
         })
@@ -264,6 +396,16 @@ searchForm.addEventListener('keyup', function(){
         updateCountryList(listOfCountries);
     }
 });
+
+searchForm.addEventListener('keyup', function(event){
+    if (event.isComposing || event.keyCode === 229) {
+        return;
+    }
+    let firstOnList = document.querySelector("#countryList li > a");
+    if (event.code == 'ArrowDown' && document.activeElement == searchForm){
+        firstOnList.focus();
+    }
+})
 
 window.addEventListener('resize', function(){
     let width = window.innerWidth;
@@ -368,13 +510,14 @@ function getCountries(){
         case 'dataset1':
             for (let i in responseData3){
                 if (responseData3[i]["Province/State"]){
-                    countries.push(responseData3[i]["Province/State"]);
+                    countries.push("_" + responseData3[i]["Province/State"]);
                 } else {
                     countries.push(responseData3[i]["Country/Region"]);
                 }
             }
-            updateCountryList(countries);
-            return countries
+            distinctCountries = [...new Set(countries)];
+            updateCountryList(distinctCountries);
+            return distinctCountries
         default:
             alert("Sorry, an unexpected error occured. Select a dataset.")
             console.log("Default in getCoutries activated");
@@ -390,17 +533,29 @@ function updateCountryList(distinctCountries){
         let newElt1 = document.createElement('li');
         let newElt2 = document.createElement('a');
         newElt2.setAttribute("href", "#");
-        newElt2.setAttribute("name", distinctCountries[i])
-        if (distinctCountries[i] == selectedCountry){
-            newElt2.setAttribute("class", "dropdown-item active");
-        }
-        else {
-            newElt2.setAttribute("class", "dropdown-item");
+        newElt2.setAttribute("name", distinctCountries[i].replace("_", ""))
+        if (regexProvinceState.test(distinctCountries[i])){
+            if (distinctCountries[i] == selectedCountry){
+                newElt2.setAttribute("class", "dropdown-item active fst-italic fw-light");
+            }
+            else {
+                newElt2.setAttribute("class", "dropdown-item fst-italic fw-light dropdown-section");
+            }
+        } else {
+            if (distinctCountries[i] == selectedCountry){
+                newElt2.setAttribute("class", "dropdown-item active");
+            }
+            else {
+                newElt2.setAttribute("class", "dropdown-item");
+                if (i > 0 && regexProvinceState.test(distinctCountries[i-1])){
+                    newElt2.setAttribute("class", newElt2.getAttribute("class") + " dropdown-section");
+                }
+            }
         }
         if (distinctCountries[i] == "France" || distinctCountries[i] == "FRA"){
             newElt2.innerHTML = distinctCountries[i] + " &#x26A1";
         } else {
-            newElt2.innerHTML = distinctCountries[i];
+            newElt2.innerHTML = distinctCountries[i].replace("_", "");
         }
         countryList.appendChild(newElt1);
         newElt1.appendChild(newElt2);
@@ -414,15 +569,6 @@ function updateCountryList(distinctCountries){
             display = displayCountryData();
         })
     };
-    if (distinctCountries.some(country => (country == selectedCountry))){
-        displayAlert(responseAlerts);
-        display = displayCountryData();
-    } else {
-        selectedCountry = "France"
-        document.getElementById("displayCountry").innerText = selectedCountry;
-        displayAlert(responseAlerts);
-        display = displayCountryData();
-    }
 };
 
 function displayAlert(alertObject){
@@ -607,13 +753,36 @@ function updateNumbers(mydata){
     let tendencyDeaths;
     let threshold;
     if (choiceDataset == dataset1.id){
-        tendencyCases = mydata[2][end] - mydata[2][end - 1];
-        tendencyDeaths = mydata[4][end] - mydata[4][end - 1];
+        if (~isNaN(mydata[8][end])){
+            let i = 1;
+            while (isNaN(tendencyCases) || typeof tendencyCases === 'undefined'){
+                tendencyCases = ((mydata[8][end] - mydata[8][end - i]) / mydata[8][end - i]) * 100;
+                i = i + 1;
+            }
+        } else {
+            let i = 1;
+            while (isNaN(tendencyCases) || typeof tendencyCases === 'undefined'){
+                tendencyCases = ((mydata[8][end - i] - mydata[8][end - i - 1]) / mydata[8][end - i - 1]) * 100;
+                i = i + 1;
+            }
+        }
+        if (~isNaN(mydata[10][end])){
+            let i = 1;
+            while (isNaN(tendencyDeaths) || typeof tendencyDeaths === 'undefined'){
+                tendencyDeaths = ((mydata[10][end] - mydata[10][end - i]) / mydata[10][end - i]) * 100;
+                i = i + 1;
+            }
+        } else {
+            while (isNaN(tendencyDeaths) || typeof tendencyDeaths === 'undefined'){
+                tendencyDeaths = ((mydata[10][end - i] - mydata[10][end - i - 1]) / mydata[10][end - i - 1]) * 100;
+                i = i + 1;
+            }
+        }
         threshold = 1;
     } else if (choiceDataset == dataset2.id){
-        tendencyCases = mydata[1][end] - mydata[1][end - 1];
-        tendencyDeaths = mydata[3][end] - mydata[3][end - 1];
-        threshold = 200;
+        tendencyCases = ((mydata[1][end] - mydata[1][end - 1]) / mydata[1][end - 1]) * 100;
+        tendencyDeaths = ((mydata[3][end] - mydata[3][end - 1]) / mydata[3][end - 1]) * 100;
+        threshold = 1;
     }
     
     document.getElementById('date1').innerText = 'Last reported on ' + dateNumbers.toString() + " (YYYY-MM-DD)";
@@ -842,9 +1011,10 @@ function statsBar(mydata){
 }
 
 function extractCountryData(){
-    let covidData = [];
+    let covidData;
     switch (choiceDataset){
         case 'dataset2':
+            covidData = [];
             for (let i in responseData1){
                 if (responseData1[i]["countriesAndTerritories"] == selectedCountry.replaceAll(' ', '_')){
                     covidData.push(responseData1[i]);
@@ -852,15 +1022,16 @@ function extractCountryData(){
             };
         break;
         case 'dataset1':
+            covidData = [[], []];
             for (let i in responseData3){
                 if (responseData3[i]["Province/State"]){
                     if (responseData3[i]["Province/State"] == selectedCountry){
-                        covidData.push(responseData3[i]); 
-                        covidData.push(responseData4[i]);
+                        covidData[0].push(responseData3[i]); 
+                        covidData[1].push(responseData4[i]);
                     }
                 } else if (responseData3[i]["Country/Region"] == selectedCountry){
-                    covidData.push(responseData3[i]);
-                    covidData.push(responseData4[i]);
+                    covidData[0].push(responseData3[i]);
+                    covidData[1].push(responseData4[i]);
                 }
             }
         break;
@@ -871,14 +1042,20 @@ function extractCountryData(){
     return covidData;
 };
 
-function dataToArray(data){
+function prepareData(data){
     let x = [];
     let yCases = [];
+    let yCasesCSAPS = [];
+    let yCasesSuperSmoother = [];
     let yCasesAvrg = [];
     let yCasesCumulative = [];
+    let yCasesCumulativeCSAPS = [];
     let yDeaths = [];
+    let yDeathsCSAPS = [];
+    let yDeathsSuperSmoother = [];
     let yDeathsAvrg = [];
     let yDeathsCumulative = [];
+    let yDeathsCumulativeCSAPS = [];
 
     switch (choiceDataset) {
         case 'dataset2':
@@ -888,17 +1065,13 @@ function dataToArray(data){
                 let hash = x[i].split(/-/g);
                 x[i] = hash[2] + "-" + hash[1] + "-" + hash[0];
                 yCases.push(data[i]["cases_weekly"]);
-                yCasesAvrg.push(NaN);
                 yDeaths.push(data[i]["deaths_weekly"]);    
-                yDeathsAvrg.push(NaN);
             };
 
             x = x.reverse();
 
             yCases = yCases.reverse();
-            yCasesAvrg = yCasesAvrg.reverse();
             yDeaths = yDeaths.reverse();
-            yDeathsAvrg = yDeathsAvrg.reverse();
         
             var i = 0;
             yCases.slice().forEach((c) => {
@@ -912,73 +1085,70 @@ function dataToArray(data){
                 i += parseInt(d);
             });
 
-        break;
+        return [x, yCases, yCasesAvrg, yDeaths, yDeathsAvrg, yCasesCumulative, yDeathsCumulative];
+        
         case 'dataset1':
-            keys = Object.keys(data[0]);
-            x = keys.filter(key => key.match(regexDate));
-            x.forEach(key => yCasesCumulative.push(data[0][key]));
-            x.forEach(key => yDeathsCumulative.push(data[1][key]));
-            for (let i in x){
-                x[i] = x[i].replace(score, "-");
-                let hash = x[i].split(/-/g);
-                x[i] = hash[2] + "-" + hash[0] + "-" + hash[1];
-            };
-
-            for (let i in keys) {
-                
-                if (i > 0){
-                    yCases.push(computeDerivative(yCasesCumulative, i, "confirmed"));
+            for (let i in data[0]) {
+                x.push(data[0][i]["date"]);
+                yCasesCumulative.push(data[0][i]["cumulative"]);
+                if (Math.round(parseFloat(data[0][i]["cum_CSAPS"])) >= 0 || isNaN(parseFloat(data[0][i]["cum_CSAPS"]))){
+                    yCasesCumulativeCSAPS.push(Math.round(parseFloat(data[0][i]["cum_CSAPS"])));
                 } else {
-                    yCases.push(yCasesCumulative[i]);
+                    yCasesCumulativeCSAPS.push(Number(0));
                 }
-
-                if (i > 0){
-                    yDeaths.push(computeDerivative(yDeathsCumulative, i, "deaths"));
+                yCases.push(data[0][i]["daily"]);
+                if (Math.round(parseFloat(data[0][i]["daily_CSAPS"])) >= 0 || isNaN(parseFloat(data[0][i]["daily_CSAPS"]))){
+                    yCasesCSAPS.push(Math.round(parseFloat(data[0][i]["daily_CSAPS"])));
                 } else {
-                    yDeaths.push(yDeathsCumulative[i]);
+                    yCasesCSAPS.push(Number(0));
                 }
-
+                if (Math.round(parseFloat(data[0][i]["daily_SuperSmoother"])) >= 0 || isNaN(parseFloat(data[0][i]["daily_SuperSmoother"]))){
+                    yCasesSuperSmoother.push(Math.round(parseFloat(data[0][i]["daily_SuperSmoother"])));
+                } else {
+                    yCasesSuperSmoother.push(Number(0));
+                }
+                yDeathsCumulative.push(data[1][i]["cumulative"]);
+                if (Math.round(parseFloat(data[1][i]["cum_CSAPS"])) >= 0 || isNaN(parseFloat(data[1][i]["cum_CSAPS"]))){
+                    yDeathsCumulativeCSAPS.push(Math.round(parseFloat(data[1][i]["cum_CSAPS"])));
+                } else {
+                    yDeathsCumulativeCSAPS.push(Number(0));
+                }
+                yDeaths.push(data[1][i]["daily"]);
+                if (Math.round(parseFloat(data[1][i]["daily_CSAPS"])) >= 0 || isNaN(parseFloat(data[1][i]["daily_CSAPS"]))){
+                    yDeathsCSAPS.push(Math.round(parseFloat(data[1][i]["daily_CSAPS"])));
+                } else {
+                    yDeathsCSAPS.push(Number(0));
+                }
+                if (Math.round(parseFloat(data[1][i]["daily_SuperSmoother"])) >= 0 || isNaN(parseFloat(data[1][i]["daily_SuperSmoother"]))){
+                    yDeathsSuperSmoother.push(Math.round(parseFloat(data[1][i]["daily_SuperSmoother"])));
+                } else {
+                    yDeathsSuperSmoother.push(Number(0))
+                }
             }
             for (let i in yCases) {
                 if (i > 6){
-                    yDeathsAvrg.push(computeAverage(yDeaths, i, 7, "deaths"));
+                    yDeathsAvrg.push(computeAverage(yDeaths, i, 7));
                 } else {
                     yDeathsAvrg.push(NaN);
                 }
                 if (i > 6){
-                    yCasesAvrg.push(computeAverage(yCases, i, 7, "confirmed"));
+                    yCasesAvrg.push(computeAverage(yCases, i, 7));
                 } else {
                     yCasesAvrg.push(NaN);
                 }
             }
 
-        break;
+        return [x, yCases, yCasesAvrg, yDeaths, yDeathsAvrg, yCasesCumulative, yDeathsCumulative,  yCasesCSAPS, yCasesSuperSmoother, yCasesCumulativeCSAPS, yDeathsCSAPS, yDeathsSuperSmoother, yDeathsCumulativeCSAPS];
         default:
             alert("Sorry, an unexpected error occured.");
+        return null
     }
-
-    return [x, yCases, yCasesAvrg, yDeaths, yDeathsAvrg, yCasesCumulative, yDeathsCumulative];
 };
 
 
-function computeAverage(x, index, range, type) {
-    switch (choiceDataset){
-        case 'dataset2':
-            return Math.round(x.slice(
-                parseInt(index), parseInt(index) + range
-            )
-            .map(x => x[type])
-            .reduce((acc, val) => parseInt(acc) + parseInt(val))
-            / range)
-        case 'dataset1':
-            return Math.round(x.slice(
-                parseInt(index) - range + 1, parseInt(index) + 1
-            )
-            .reduce((acc, val) => acc + val)
-            / range)
-        default:
-            console.log("Default in computeAverage activated")
-    }
+function computeAverage(x, index, range) {
+x = x.map(str => Number(str));
+return Math.round(x.slice(parseInt(index) - range + 1, parseInt(index) + 1).reduce((acc, val) => acc + val) / range)
 }
 
 function accumulate(a, b) {
@@ -1136,7 +1306,7 @@ function plotTimeseriesYGraph(chartID, xdata, dataObject1, legendShow, dataObjec
 function displayCountryData(){
     let displayObject;
     let covidData = extractCountryData();
-    let mydata = dataToArray(covidData);
+    let mydata = prepareData(covidData);
     updateNumbers(mydata);
     statsBar(mydata);
 
@@ -1149,9 +1319,9 @@ function displayCountryData(){
                     columns: [
                     ["cases_raw"].concat(mydata[1]),
                     ],
-                    types: {cases_raw: 'scatter'},
+                    types: {cases_raw: 'bar'},
                     names: {cases_raw: "Raw data"},
-                    colors: {cases_raw: "#2c7be5"},
+                    colors: {cases_raw: "#205499"},
                 },
                 cases_mvavg: {
                     columns: [
@@ -1170,18 +1340,36 @@ function displayCountryData(){
                     colors: {cases_cum_raw: "#39afd1"},
                 },
                 cases_filter1: {
-
+                    columns: [
+                    ["cases_filter1"].concat(mydata[7]),
+                    ],
+                    types: {cases_filter1: 'line'},
+                    names: {cases_filter1: "Cubic smoothing splines"},
+                    colors: {cases_filter1: "#39afd1"},
                 },
                 cases_filter2: {
-                    
+                    columns: [
+                    ["cases_filter2"].concat(mydata[8]),
+                    ],
+                    types: {cases_filter2: 'line'},
+                    names: {cases_filter2: "Super Smoother"},
+                    colors: {cases_filter2: "#39afd1"},
+                },
+                cases_cum_filter: {
+                    columns: [
+                    ["cases_cum_filter"].concat(mydata[9]),
+                    ],
+                    types: {cases_cum_filter: 'area'},
+                    names: {cases_cum_filter: "Cubic smoothing splines"},
+                    colors: {cases_cum_filter: "#39afd1"},
                 },
                 deaths_raw: {
                     columns: [
                     ["deaths_raw"].concat(mydata[3]),
                     ],
-                    types: {deaths_raw: 'scatter'},
+                    types: {deaths_raw: 'bar'},
                     names: {deaths_raw: "Raw data"},
-                    colors: {deaths_raw: "#2c7be5"},
+                    colors: {deaths_raw: "#205499"},
                 },
                 deaths_mvavg: {
                     columns: [
@@ -1192,18 +1380,36 @@ function displayCountryData(){
                     colors: {deaths_mvavg: "#6e84a3"},
                 },
                 deaths_filter1: {
-
+                    columns: [
+                    ["deaths_filter1"].concat(mydata[10]),
+                    ],
+                    types: {deaths_filter1: 'line'},
+                    names: {deaths_filter1: "Cubic smoothing splines"},
+                    colors: {deaths_filter1: "#6e84a3"},
                 },
                 deaths_filter2: {
-                    
+                    columns: [
+                    ["deaths_filter2"].concat(mydata[11]),
+                    ],
+                    types: {deaths_filter2: 'line'},
+                    names: {deaths_filter2: "Super Smoother"},
+                    colors: {deaths_filter2: "#6e84a3"},
                 },
                 deaths_cum_raw: {
                     columns: [
                     ["deaths_cum_raw"].concat(mydata[6]),
                     ],
                     types: {deaths_cum_raw: 'area'},
-                    names: {deaths_cum_raw: "7 days moving average"},
+                    names: {deaths_cum_raw: "Raw data"},
                     colors: {deaths_cum_raw: "#6e84a3"},
+                },
+                deaths_cum_filter: {
+                    columns: [
+                    ["deaths_cum_filter"].concat(mydata[12]),
+                    ],
+                    types: {deaths_cum_filter: 'area'},
+                    names: {deaths_cum_filter: "Cubic smoothing splines"},
+                    colors: {deaths_cum_filter: "#6e84a3"},
                 },
             }
 
@@ -1233,9 +1439,6 @@ function displayCountryData(){
                     names: {cases_cum_raw: "Raw data"},
                     colors: {cases_cum_raw: "#39afd1"},
                 },
-                cases_filter1: {
-
-                },
                 deaths_raw: {
                     columns: [
                     ["deaths_raw"].concat(mydata[3]),
@@ -1243,9 +1446,6 @@ function displayCountryData(){
                     types: {deaths_raw: 'bar'},
                     names: {deaths_raw: "Raw data"},
                     colors: {deaths_raw: "#6e84a3"},
-                },
-                deaths_filter1: {
-
                 },
                 deaths_cum_raw: {
                     columns: [

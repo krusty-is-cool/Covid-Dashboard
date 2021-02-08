@@ -93,6 +93,7 @@
                             </form>
                             <li><hr class="dropdown-divider"></li>
                             <div id="countryList">
+                              <li><a class="dropdown-item disabled" href="#" tabindex="-1" aria-disabled="true"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...</a></li>
                             </div>
                           </ul>
                         </div>
@@ -391,7 +392,7 @@
                       <div class="col align-self-center">
                         <h6  class="text-uppercase mb-0 user-select-none" id="graph1Header">Daily Cases</h6>
                       </div>
-                      <div class="col-auto align-self-center">
+                      <div class="col-auto align-self-center d-none">
                         <div class="form-check form-switch ml-1">
                           <small class="text-muted-white colored-black fw-bold user-select-none">Log</small>
                           <input class="form-check-input" type="checkbox" id="graph1Log" disabled>
@@ -408,13 +409,13 @@
                       </div>
                       <div class="col-auto align-self-center" id="graph1SettingsGroup">
                         <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
-                          <input type="radio" class="btn-check" name="graph1Settings2" id="graph1Settings3" autocomplete="off" checked disabled>
+                          <input type="radio" class="btn-check" name="graph1Settings2" id="graph1Settings3" autocomplete="off" checked>
                           <label class="btn btn-outline-primary text-white" for="graph1Settings3">Raw</label>
                         
-                          <input type="radio" class="btn-check" name="graph1Settings2" id="graph1Settings4" autocomplete="off" disabled>
+                          <input type="radio" class="btn-check" name="graph1Settings2" id="graph1Settings4" autocomplete="off">
                           <label class="btn btn-outline-primary text-white" for="graph1Settings4">Filter 1</label>
 
-                          <input type="radio" class="btn-check" name="graph1Settings2" id="graph1Settings5" autocomplete="off" disabled>
+                          <input type="radio" class="btn-check" name="graph1Settings2" id="graph1Settings5" autocomplete="off">
                           <label class="btn btn-outline-primary text-white" for="graph1Settings5">Filter 2</label>
                         </div>
                       </div>
@@ -432,7 +433,7 @@
                       <div class="col align-self-center">
                         <h6 class="text-uppercase mb-0 user-select-none">Cumulative Cases</h6>
                       </div>
-                      <div class="col-auto align-self-center">
+                      <div class="col-auto align-self-center d-none">
                         <div class="form-check form-switch ml-1">
                           <small class="text-muted-white colored-black fw-bold user-select-none">Log</small>
                           <input class="form-check-input" type="checkbox" id="graph2Log" disabled>
@@ -449,10 +450,10 @@
                       </div>
                       <div class="col-auto align-self-center" id="graph2SettingsGroup">
                         <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
-                          <input type="radio" class="btn-check" name="graph2Settings2" id="graph2Settings3" autocomplete="off" checked disabled>
-                          <label class="btn btn-outline-primary text-white for="graph2Settings3">Raw</label>
+                          <input type="radio" class="btn-check" name="graph2Settings2" id="graph2Settings3" autocomplete="off" checked>
+                          <label class="btn btn-outline-primary text-white" for="graph2Settings3">Raw</label>
                         
-                          <input type="radio" class="btn-check" name="graph2Settings2" id="graph2Settings4" autocomplete="off" disabled>
+                          <input type="radio" class="btn-check" name="graph2Settings2" id="graph2Settings4" autocomplete="off">
                           <label class="btn btn-outline-primary text-white" for="graph2Settings4">Filter</label>
                         </div>
                       </div>

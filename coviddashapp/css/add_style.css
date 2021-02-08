@@ -15,6 +15,10 @@ img.emoji {
     overflow-y:auto;
 }
 
+.dropdown-section{
+    background-color: #12263F;
+}
+
 .colored{
     color:#6e84a3;
 }
@@ -35,10 +39,6 @@ img.emoji {
     stroke-width: 2px;
 }
 
-.graph{
-    max-height: 80vh;
-}
-
 .graph-small{
     width: 80px;
     height: 42px;
@@ -48,8 +48,18 @@ img.emoji {
     max-height: 80vh;
 }
 
-@media (min-width: 1400px) {
-    .row.custom-row {
-        column-count: 2;
+@media (max-height: 567px) {
+    .graph{
+        height: 60vh;
+    }
+}
+@media (min-height: 568px) {
+    .graph{
+        height: 40vh;
+    }
+}
+@media (min-height: 768px) {
+    .graph{
+        height: 35vh;
     }
 }
