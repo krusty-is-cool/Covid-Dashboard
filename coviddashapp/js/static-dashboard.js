@@ -368,9 +368,7 @@ searchForm.addEventListener('input', function(){
                 newElt1.appendChild(newElt2);
                 newElt1.addEventListener('click', function(){
                     selectedCountry = newElt2.getAttribute("name");
-                    newElt2.setAttribute("class", "dropdown-item active");
                     document.getElementById("displayCountry").innerText = selectedCountry;
-                    updateCountryList(listOfCountries);
                     enhancedData(modalGraphsData);
                     displayAlert(responseAlerts);
                     display = displayCountryData();
@@ -535,7 +533,7 @@ function updateCountryList(distinctCountries){
         newElt2.setAttribute("href", "#");
         newElt2.setAttribute("name", distinctCountries[i].replace("_", ""))
         if (regexProvinceState.test(distinctCountries[i])){
-            if (distinctCountries[i] == selectedCountry){
+            if (distinctCountries[i] == "_" + selectedCountry){
                 newElt2.setAttribute("class", "dropdown-item active fst-italic fw-light");
             }
             else {
@@ -560,13 +558,16 @@ function updateCountryList(distinctCountries){
         countryList.appendChild(newElt1);
         newElt1.appendChild(newElt2);
         newElt1.addEventListener('click', function(){
-            document.querySelector("#countryList > li > a.active").setAttribute("class", "dropdown-item");
             selectedCountry = newElt2.getAttribute("name");
-            newElt2.setAttribute("class", "dropdown-item active");
             document.getElementById("displayCountry").innerText = selectedCountry;
             enhancedData(modalGraphsData);
             displayAlert(responseAlerts);
             display = displayCountryData();
+            searchForm.value = '';
+            graph1Cases.checked = true;
+            graph1Raw.checked = true;
+            graph2Cases.checked = true;
+            graph2Raw.checked = true;
         })
     };
 };
@@ -757,25 +758,41 @@ function updateNumbers(mydata){
             let i = 1;
             while (isNaN(tendencyCases) || typeof tendencyCases === 'undefined'){
                 tendencyCases = ((mydata[8][end] - mydata[8][end - i]) / mydata[8][end - i]) * 100;
-                i = i + 1;
+                if (i < 5) {
+                    i = i + 1;
+                } else {
+                    break;
+                }          
             }
         } else {
             let i = 1;
             while (isNaN(tendencyCases) || typeof tendencyCases === 'undefined'){
                 tendencyCases = ((mydata[8][end - i] - mydata[8][end - i - 1]) / mydata[8][end - i - 1]) * 100;
-                i = i + 1;
+                if (i < 5) {
+                    i = i + 1;
+                } else {
+                    break;
+                }  
             }
         }
         if (~isNaN(mydata[10][end])){
             let i = 1;
             while (isNaN(tendencyDeaths) || typeof tendencyDeaths === 'undefined'){
                 tendencyDeaths = ((mydata[10][end] - mydata[10][end - i]) / mydata[10][end - i]) * 100;
-                i = i + 1;
+                if (i < 5) {
+                    i = i + 1;
+                } else {
+                    break;
+                }  
             }
         } else {
             while (isNaN(tendencyDeaths) || typeof tendencyDeaths === 'undefined'){
                 tendencyDeaths = ((mydata[10][end - i] - mydata[10][end - i - 1]) / mydata[10][end - i - 1]) * 100;
-                i = i + 1;
+                if (i < 5) {
+                    i = i + 1;
+                } else {
+                    break;
+                }  
             }
         }
         threshold = 1;
