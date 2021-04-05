@@ -4,7 +4,7 @@
 //Fetch Data
 const today = new Date();
 const dateOfEnd = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-const url1 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetCSV/?url=https://opendata.ecdc.europa.eu/covid19/casedistribution/csv";
+const url1 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/CORSgetCSV/?url=https://opendata.ecdc.europa.eu/covid19/nationalcasedeath_eueea_daily_ei/csv/data.csv";
 const url3 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/covid19/jhcsse?dataset=cases";
 const url4 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/covid19/jhcsse?dataset=deaths";
 const url5 = "https://krusty.westeurope.cloudapp.azure.com/api/v2/FRcovidIndicators/";
@@ -75,8 +75,6 @@ const graph1Filter2 = document.getElementById("graph1Settings5");
 const graph2Log = document.getElementById("graph2Log");
 const graph2Cases = document.getElementById("graph2Settings1");
 const graph2Deaths = document.getElementById("graph2Settings2");
-const graph2Raw = document.getElementById("graph2Settings3");
-const graph2Filter = document.getElementById("graph2Settings4");
 
 //HTTP REQUESTS, FUNCTION CALLING AND EVENTS
 //Enhanced Data Request data.gouv.fr
@@ -170,13 +168,13 @@ dataset1.addEventListener('click', function(){
         display = displayCountryData();
     }
     document.getElementById("graph1SettingsGroup").setAttribute("class", "col-auto align-self-center");
-    document.getElementById("graph2SettingsGroup").setAttribute("class", "col-auto align-self-center");
     graph1Cases.checked = true;
     graph1Log.checked = false;
     graph2Cases.checked = true;
     graph2Log.checked = false;
     graph1Raw.checked = true;
-    graph2Raw.checked = true;
+    document.getElementById("graph1Header").innerText = "Daily Cases";
+    document.getElementById("graph2Header").innerText = "Cumulative Cases";
 });
 
 dataset2.addEventListener('click', function(){
@@ -192,13 +190,13 @@ dataset2.addEventListener('click', function(){
         display = displayCountryData();
     }
     document.getElementById("graph1SettingsGroup").setAttribute("class", "col-auto align-self-center d-none");
-    document.getElementById("graph2SettingsGroup").setAttribute("class", "col-auto align-self-center d-none");
     graph1Cases.checked = true;
     graph1Log.checked = false;
     graph2Cases.checked = true;
     graph2Log.checked = false;
     graph1Raw.checked = true;
-    graph2Raw.checked = true;
+    document.getElementById("graph1Header").innerText = "Daily Cases";
+    document.getElementById("graph2Header").innerText = "Cumulative Cases";
 });
 
 document.querySelector("#settings .dropdown").addEventListener('hidden.bs.dropdown', function(){
@@ -232,9 +230,10 @@ graph1Cases.addEventListener('click', function(){
         break;
         case 'dataset2':
             chart1.destroy();
-            chart1 = plotTimeseriesYGraph("graph1", display.xdata, display.cases_raw, false);
+            chart1 = plotTimeseriesYGraph("graph1", display.xdata.slice(-display.xdata.length+1), display.cases_raw, false);
         break;
     }
+    document.getElementById("graph1Header").innerText = "Daily Cases";
 })
 
 graph1Deaths.addEventListener('click', function(){
@@ -246,9 +245,10 @@ graph1Deaths.addEventListener('click', function(){
         break;
         case 'dataset2':
             chart1.destroy();
-            chart1 = plotTimeseriesYGraph("graph1", display.xdata, display.deaths_raw, false);
+            chart1 = plotTimeseriesYGraph("graph1", display.xdata.slice(-display.xdata.length+1), display.deaths_raw, false);
         break;
     }
+    document.getElementById("graph1Header").innerText = "Daily Deaths";
 })
 
 graph1Raw.addEventListener('click', function(){
@@ -292,38 +292,15 @@ graph2Log.addEventListener('click', function(){
 graph2Cases.addEventListener('click', function(){
     chart2.destroy();
     chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.cases_cum_raw, false);
-    graph2Raw.checked = true;
+    document.getElementById("graph2Header").innerText = "Cumulative Cases";
 })
 
 graph2Deaths.addEventListener('click', function(){
     chart2.destroy();
     chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.deaths_cum_raw, false);
-    graph2Raw.checked = true;
+    document.getElementById("graph2Header").innerText = "Cumulative Deaths";
 })
 
-graph2Raw.addEventListener('click', function(){
-    if (choiceDataset == 'dataset1'){
-        if (graph2Cases.checked == true){
-            chart2.destroy();
-            chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.cases_cum_raw, false);
-        } else if (graph2Deaths.checked == true) {
-            chart2.destroy();
-            chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.deaths_cum_raw, false);
-        }
-    }
-})
-
-graph2Filter.addEventListener('click', function(){
-    if (choiceDataset == 'dataset1'){
-        if (graph2Cases.checked == true){
-            chart2.destroy();
-            chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.cases_cum_filter, false);
-        } else if (graph2Deaths.checked == true) {
-            chart2.destroy();
-            chart2 = plotTimeseriesYGraph("graph2", display.xdata, display.deaths_cum_filter, false);
-        }    
-    }
-})
 
 window.addEventListener('offline', function(){
     offlineMode();
@@ -376,7 +353,7 @@ searchForm.addEventListener('input', function(){
                     graph1Cases.checked = true;
                     graph1Raw.checked = true;
                     graph2Cases.checked = true;
-                    graph2Raw.checked = true;
+                    
                 })
             }
         })
@@ -567,7 +544,7 @@ function updateCountryList(distinctCountries){
             graph1Cases.checked = true;
             graph1Raw.checked = true;
             graph2Cases.checked = true;
-            graph2Raw.checked = true;
+            
         })
     };
 };
@@ -723,7 +700,12 @@ function removeLoadingFromButton(labelID, datasetNumber, text, enable, error){
         document.getElementById(labelID).innerHTML = "<svg width='1em' height='1em' viewBox='0 0 16 16' class='bi bi-exclamation-triangle-fill' fill='currentColor' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 5zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z'/></svg> " + text;
     } else {
         document.getElementById(labelID).removeChild(document.querySelector("#" + labelID + " > span.spinner-border"));
-        document.querySelector("#" + labelID + " > span").innerText = text;
+        if (datasetNumber == 1){
+            document.querySelector("#" + labelID + " > span").innerHTML= "&#x1f30d " + text;
+        }
+        else if (datasetNumber == 2){
+            document.querySelector("#" + labelID + " > span").innerHTML = "&#x1f1ea&#x1f1fa " + text;
+        }
     }
 }
 
@@ -827,7 +809,7 @@ function updateNumbers(mydata){
         if (choiceDataset == dataset1.id){
             document.getElementById('nbDailyCasesHeader').innerText = "Daily Cases";
         } else if (choiceDataset == dataset2.id){
-            document.getElementById('nbDailyCasesHeader').innerText = "Weekly Cases";
+            document.getElementById('nbDailyCasesHeader').innerText = "Daily Cases";
         }
         document.getElementById('nbCumCasesHeader').innerText = "Cumulative Cases";
     
@@ -838,7 +820,7 @@ function updateNumbers(mydata){
         if (choiceDataset == dataset1.id){
             document.getElementById('nbDailyDeathsHeader').innerText = "Daily Deaths";
         } else if (choiceDataset == dataset2.id){
-            document.getElementById('nbDailyDeathsHeader').innerText = "Weekly Deaths";
+            document.getElementById('nbDailyDeathsHeader').innerText = "Daily Deaths";
         }
         document.getElementById('nbCumDeathsHeader').innerText = "Cumulative Deaths";
 }
@@ -1066,13 +1048,11 @@ function prepareData(data){
     let yCasesSuperSmoother = [];
     let yCasesAvrg = [];
     let yCasesCumulative = [];
-    let yCasesCumulativeCSAPS = [];
     let yDeaths = [];
     let yDeathsCSAPS = [];
     let yDeathsSuperSmoother = [];
     let yDeathsAvrg = [];
     let yDeathsCumulative = [];
-    let yDeathsCumulativeCSAPS = [];
 
     switch (choiceDataset) {
         case 'dataset2':
@@ -1081,8 +1061,8 @@ function prepareData(data){
                 x[i] = x[i].replace(score, "-");
                 let hash = x[i].split(/-/g);
                 x[i] = hash[2] + "-" + hash[1] + "-" + hash[0];
-                yCases.push(data[i]["cases_weekly"]);
-                yDeaths.push(data[i]["deaths_weekly"]);    
+                yCases.push(data[i]["cases"]);
+                yDeaths.push(data[i]["deaths"]);    
             };
 
             x = x.reverse();
@@ -1101,18 +1081,13 @@ function prepareData(data){
                 yDeathsCumulative.push(i + parseInt(d));
                 i += parseInt(d);
             });
-
+            
         return [x, yCases, yCasesAvrg, yDeaths, yDeathsAvrg, yCasesCumulative, yDeathsCumulative];
         
         case 'dataset1':
             for (let i in data[0]) {
                 x.push(data[0][i]["date"]);
                 yCasesCumulative.push(data[0][i]["cumulative"]);
-                if (Math.round(parseFloat(data[0][i]["cum_CSAPS"])) >= 0 || isNaN(parseFloat(data[0][i]["cum_CSAPS"]))){
-                    yCasesCumulativeCSAPS.push(Math.round(parseFloat(data[0][i]["cum_CSAPS"])));
-                } else {
-                    yCasesCumulativeCSAPS.push(Number(0));
-                }
                 yCases.push(data[0][i]["daily"]);
                 if (Math.round(parseFloat(data[0][i]["daily_CSAPS"])) >= 0 || isNaN(parseFloat(data[0][i]["daily_CSAPS"]))){
                     yCasesCSAPS.push(Math.round(parseFloat(data[0][i]["daily_CSAPS"])));
@@ -1125,11 +1100,6 @@ function prepareData(data){
                     yCasesSuperSmoother.push(Number(0));
                 }
                 yDeathsCumulative.push(data[1][i]["cumulative"]);
-                if (Math.round(parseFloat(data[1][i]["cum_CSAPS"])) >= 0 || isNaN(parseFloat(data[1][i]["cum_CSAPS"]))){
-                    yDeathsCumulativeCSAPS.push(Math.round(parseFloat(data[1][i]["cum_CSAPS"])));
-                } else {
-                    yDeathsCumulativeCSAPS.push(Number(0));
-                }
                 yDeaths.push(data[1][i]["daily"]);
                 if (Math.round(parseFloat(data[1][i]["daily_CSAPS"])) >= 0 || isNaN(parseFloat(data[1][i]["daily_CSAPS"]))){
                     yDeathsCSAPS.push(Math.round(parseFloat(data[1][i]["daily_CSAPS"])));
@@ -1155,7 +1125,7 @@ function prepareData(data){
                 }
             }
 
-        return [x, yCases, yCasesAvrg, yDeaths, yDeathsAvrg, yCasesCumulative, yDeathsCumulative,  yCasesCSAPS, yCasesSuperSmoother, yCasesCumulativeCSAPS, yDeathsCSAPS, yDeathsSuperSmoother, yDeathsCumulativeCSAPS];
+        return [x, yCases, yCasesAvrg, yDeaths, yDeathsAvrg, yCasesCumulative, yDeathsCumulative, yCasesCSAPS, yCasesSuperSmoother, yDeathsCSAPS, yDeathsSuperSmoother];
         default:
             alert("Sorry, an unexpected error occured.");
         return null
@@ -1372,14 +1342,6 @@ function displayCountryData(){
                     names: {cases_filter2: "Super Smoother"},
                     colors: {cases_filter2: "#39afd1"},
                 },
-                cases_cum_filter: {
-                    columns: [
-                    ["cases_cum_filter"].concat(mydata[9]),
-                    ],
-                    types: {cases_cum_filter: 'area'},
-                    names: {cases_cum_filter: "Cubic smoothing splines"},
-                    colors: {cases_cum_filter: "#39afd1"},
-                },
                 deaths_raw: {
                     columns: [
                     ["deaths_raw"].concat(mydata[3]),
@@ -1398,7 +1360,7 @@ function displayCountryData(){
                 },
                 deaths_filter1: {
                     columns: [
-                    ["deaths_filter1"].concat(mydata[10]),
+                    ["deaths_filter1"].concat(mydata[9]),
                     ],
                     types: {deaths_filter1: 'line'},
                     names: {deaths_filter1: "Cubic smoothing splines"},
@@ -1406,7 +1368,7 @@ function displayCountryData(){
                 },
                 deaths_filter2: {
                     columns: [
-                    ["deaths_filter2"].concat(mydata[11]),
+                    ["deaths_filter2"].concat(mydata[10]),
                     ],
                     types: {deaths_filter2: 'line'},
                     names: {deaths_filter2: "Super Smoother"},
@@ -1420,14 +1382,6 @@ function displayCountryData(){
                     names: {deaths_cum_raw: "Raw data"},
                     colors: {deaths_cum_raw: "#6e84a3"},
                 },
-                deaths_cum_filter: {
-                    columns: [
-                    ["deaths_cum_filter"].concat(mydata[12]),
-                    ],
-                    types: {deaths_cum_filter: 'area'},
-                    names: {deaths_cum_filter: "Cubic smoothing splines"},
-                    colors: {deaths_cum_filter: "#6e84a3"},
-                },
             }
 
             chart1 = plotTimeseriesYGraph("graph1", mydata[0],displayObject.cases_raw, true, displayObject.cases_mvavg);
@@ -1436,13 +1390,13 @@ function displayCountryData(){
             return displayObject
 
         case 'dataset2':
-            document.getElementById("graph1Header").innerText = "Weekly Cases";
+            document.getElementById("graph1Header").innerText = "Daily Cases";
 
             displayObject = {
                 xdata: mydata[0],
                 cases_raw: {
                     columns: [
-                    ["cases_raw"].concat(mydata[1]),
+                    ["cases_raw"].concat(mydata[1].slice(-mydata[1].length+1)),
                     ],
                     types: {cases_raw: 'bar'},
                     names: {cases_raw: "Raw data"},
@@ -1458,7 +1412,7 @@ function displayCountryData(){
                 },
                 deaths_raw: {
                     columns: [
-                    ["deaths_raw"].concat(mydata[3]),
+                    ["deaths_raw"].concat(mydata[3].slice(-mydata[3].length+1)),
                     ],
                     types: {deaths_raw: 'bar'},
                     names: {deaths_raw: "Raw data"},
@@ -1474,8 +1428,8 @@ function displayCountryData(){
                 },
             }
 
-            chart1 = plotTimeseriesYGraph("graph1", mydata[0], displayObject.cases_raw, false);
-            chart2 = plotTimeseriesYGraph("graph2", mydata[0], displayObject.cases_cum_raw, false);
+            chart1 = plotTimeseriesYGraph("graph1", mydata[0].slice(-mydata[0].length+1), displayObject.cases_raw, false);
+            chart2 = plotTimeseriesYGraph("graph2", mydata[0].slice(-mydata[0].length+1), displayObject.cases_cum_raw, false);
 
             return displayObject
     }
