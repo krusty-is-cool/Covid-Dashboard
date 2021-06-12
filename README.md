@@ -5,7 +5,7 @@ A simple dashboard
 
 [GO !](https://www.coviddash.app/)
 
-Only HTLM, CSS (Bootstrap CDN) and JavaScript. No server control on this repository. There is a flask (python) based back-end to deliver datasets.
+Only HTLM, CSS (Bootstrap) and JavaScript. No server control on this repository. There is a flask (python) based back-end to deliver datasets.
 
 Progressive Web App standard. You can install it on you desktop and your mobile devices. There is a service worker which manages caches to keep the app available when the device is offline. In addition, it slightly improves the performances. The dynamic cache that stores the datasets renews itself every hour, although datasets are updated daily.
 
