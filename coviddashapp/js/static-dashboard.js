@@ -577,6 +577,7 @@ searchForm.addEventListener('input', function(){
                     selectedCountry = newElt2.getAttribute("name");
                     document.getElementById("displayCountry").innerText = selectedCountry;
                     enhancedData(modalGraphsData);
+                    vaccinationDataEnabler();
                     displayAlert(responseAlerts);
                     display = displayCountryData();
                     searchForm.value = '';
@@ -768,6 +769,7 @@ function updateCountryList(distinctCountries){
             selectedCountry = newElt2.getAttribute("name");
             document.getElementById("displayCountry").innerText = selectedCountry;
             enhancedData(modalGraphsData);
+            vaccinationDataEnabler();
             displayAlert(responseAlerts);
             display = displayCountryData();
             searchForm.value = '';
@@ -1437,6 +1439,20 @@ function vaccinationData(vaccinByAge){
     document.getElementById("completeVaccinationNumberDate").innerText = "Last reported on " + vaccinByAge.date[vaccinByAge.date.length - 1]; 
     document.getElementById("completeVaccinationPourcentDate").innerText = "Last reported on " + vaccinByAge.date[vaccinByAge.date.length - 1]; 
     sparkChart6 = plotSparkGraph("completeVaccinationSparkGraph", vaccinByAge.date, vaccinByAge.couv_complet.data0, "#2c7be5", threshold, completeThresholdColor);   
+}
+
+function vaccinationDataEnabler(){
+    if (selectedCountry == "France" || selectedCountry == "FRA"){
+        document.getElementById('vaccinData').setAttribute("class", "");
+        document.getElementById('graph3Card').setAttribute("class", "card bg-dark text-white h-100");
+        document.getElementById('graph4Card').setAttribute("class", "card bg-dark text-white h-100");
+        document.getElementById('graph5Card').setAttribute("class", "card bg-dark text-white h-100");
+    } else {
+        document.getElementById('vaccinData').setAttribute("class", "d-none");
+        document.getElementById('graph3Card').setAttribute("class", "card bg-dark text-white h-100 d-none");
+        document.getElementById('graph4Card').setAttribute("class", "card bg-dark text-white h-100 d-none");
+        document.getElementById('graph5Card').setAttribute("class", "card bg-dark text-white h-100 d-none");
+    }
 }
 
 function statsBar(mydata){
