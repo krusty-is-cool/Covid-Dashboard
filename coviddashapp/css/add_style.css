@@ -39,13 +39,50 @@ img.emoji {
     stroke-width: 2px;
 }
 
+#graph3 .line-slightly-thicker {
+    stroke-width: 1.5px;
+}
+
+#graph4 .line-slightly-thicker {
+    stroke-width: 1.5px;
+}
+
+#graph5 .line-slightly-thicker {
+    stroke-width: 1.5px;
+}
+
+#partialVaccinationSparkGraph .line-dash {
+    stroke-dasharray: 3 4;
+}
+
+#completeVaccinationSparkGraph .line-dash {
+    stroke-dasharray: 3 4;
+}
+
 .graph-small{
     width: 80px;
     height: 42px;
 }
 
+.graph-small2{
+    width: 80px;
+    height: 72px;
+}
+
 .graph-modal{
     max-height: 80vh;
+}
+
+.card-footer{
+    border-top: none;
+    background-color: rgba(0, 0, 0, 0);
+    padding: 0rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.card-body-custom{
+    padding: 0rem 1rem;
+    margin-top: 1rem;
 }
 
 @media (max-height: 567px) {

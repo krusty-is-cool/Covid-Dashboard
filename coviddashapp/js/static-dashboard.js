@@ -9,22 +9,35 @@ const url3 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/covid19/jhcsse
 const url4 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/covid19/jhcsse?dataset=deaths";
 const url5 = "https://krusty.westeurope.cloudapp.azure.com/api/v2/FRcovidIndicators/";
 const url6 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/alerts";
+const url7 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/FrCovidVacci/Age";
+const url8 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/FrCovidVacci/Sex";
+const url9 = "https://krusty.westeurope.cloudapp.azure.com/api/v1/FrCovidVacci/Vaccin";
 let responseData1 = [];
 let responseData3 = [];
 let responseData4 = [];
 let responseEnhancedData = [];
+let responseVaccinDataAge = [];
+let responseVaccinDataSex = [];
+let responseVaccinDataVaccin = [];
 let responseAlerts;
 let modalGraphsData;
 let modalGraphsColor;
 let listOfCountries;
+let vaccinationDataAge;
+let vaccinationDataSex;
+let vaccinationDataVaccin;
 let chart1;
 let chart2;
 let chart3;
+let chart4;
+let chart5;
 let display;
 let sparkChart1;
 let sparkChart2;
 let sparkChart3;
 let sparkChart4;
+let sparkChart5;
+let sparkChart6;
 let modalChart1;
 let modalChart2;
 let modalChart3;
@@ -75,6 +88,23 @@ const graph1Filter2 = document.getElementById("graph1Settings5");
 const graph2Log = document.getElementById("graph2Log");
 const graph2Cases = document.getElementById("graph2Settings1");
 const graph2Deaths = document.getElementById("graph2Settings2");
+//Graph 3 Settings
+const graph3Partial = document.getElementById('graph3Settings1');
+const graph3Complete = document.getElementById('graph3Settings2');
+const graph3Daily = document.getElementById('graph3Settings3');
+const graph3Cum = document.getElementById('graph3Settings4');
+const graph3Pourcent = document.getElementById('graph3Settings5');
+//Graph 4 Settings
+const graph4Partial = document.getElementById('graph4Settings1');
+const graph4Complete = document.getElementById('graph4Settings2');
+const graph4Daily = document.getElementById('graph4Settings3');
+const graph4Cum = document.getElementById('graph4Settings4');
+const graph4Pourcent = document.getElementById('graph4Settings5');
+//Graph 5 Settings
+const graph5FirstInj = document.getElementById('graph5Settings1');
+const graph5SecondInj = document.getElementById('graph5Settings2');
+const graph5Daily = document.getElementById('graph5Settings3');
+const graph5Cum = document.getElementById('graph5Settings4');
 
 //HTTP REQUESTS, FUNCTION CALLING AND EVENTS
 //Enhanced Data Request data.gouv.fr
@@ -90,6 +120,7 @@ d3.csv(url5, function(d){
 }).catch((err) => {
     alertRequestFail("Enhanced Data from data.gouv.fr");
     console.log(err);
+    progressBar();
 })
 
 //Johns Hopkins University Centre for Science and System Engineering
@@ -142,6 +173,54 @@ fetch(url6)
 .then(data => {return data.json()})
 .then(res => {responseAlerts = res})
 .catch(err => {console.log('Unable to fetch alerts', err)})
+
+//Vaccination Data
+//by age
+d3.dsv(";",url7, function(d){
+    responseVaccinDataAge.push(d);
+}).then(() => {
+    if (document.getElementById("requestAlert" + "Vaccination Data from data.gouv.fr".replace(/\s+/g, ''))) {
+        document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Vaccination Data from data.gouv.fr".replace(/\s+/g, '')));
+    }
+    vaccinationDataAge = vaccinByAgeDataExtractor();
+    progressBar();
+    vaccinationData(vaccinationDataAge);
+    chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.n_dose1);
+}).catch((err) => {
+    alertRequestFail("Vaccination Data from data.gouv.fr");
+    console.log(err);
+    progressBar();
+})
+//by sex
+d3.dsv(";",url8, function(d){
+    responseVaccinDataSex.push(d);
+}).then(() => {
+    if (document.getElementById("requestAlert" + "Vaccination Data from data.gouv.fr".replace(/\s+/g, ''))) {
+        document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Vaccination Data from data.gouv.fr".replace(/\s+/g, '')));
+    }
+    vaccinationDataSex = vaccinBySexDataExtractor();
+    progressBar();
+    chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.n_dose1);
+}).catch((err) => {
+    alertRequestFail("Vaccination Data from data.gouv.fr");
+    console.log(err);
+    progressBar();
+})
+//by vaccin
+d3.dsv(";",url9, function(d){
+    responseVaccinDataVaccin.push(d);
+}).then(() => {
+    if (document.getElementById("requestAlert" + "Vaccination Data from data.gouv.fr".replace(/\s+/g, ''))) {
+        document.getElementById('settings').removeChild(document.getElementById("requestAlert" + "Vaccination Data from data.gouv.fr".replace(/\s+/g, '')));
+    }
+    vaccinationDataVaccin = vaccinByVaccinDataExtractor();
+    progressBar();
+    chart5 = plotVaccinationByVaccinGraph("graph5",vaccinationDataVaccin.date,vaccinationDataVaccin.n_dose1);
+}).catch((err) => {
+    alertRequestFail("Vaccination Data from data.gouv.fr");
+    console.log(err);
+    progressBar();
+})
 
 //Events
 function ready(callbackFunction){
@@ -301,6 +380,157 @@ graph2Deaths.addEventListener('click', function(){
     document.getElementById("graph2Header").innerText = "Cumulative Deaths";
 })
 
+graph3Partial.addEventListener('click', function(){
+    if (graph3Daily.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.n_dose1);
+    }else if (graph3Cum.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.n_cum_dose1);
+    }else if (graph3Pourcent.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.couv_dose1);
+    }
+})
+
+graph3Complete.addEventListener('click', function(){
+    if (graph3Daily.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.n_complet);
+    }else if (graph3Cum.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.n_cum_complet);
+    }else if (graph3Pourcent.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.couv_complet);
+    }
+})
+
+graph3Daily.addEventListener('click', function(){
+    if (graph3Partial.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.n_dose1);
+    }else if (graph3Complete.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.n_complet);
+    }
+})
+
+graph3Cum.addEventListener('click', function(){
+    if (graph3Partial.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.n_cum_dose1);
+    }else if (graph3Complete.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.n_cum_complet);
+    }
+})
+
+graph3Pourcent.addEventListener('click', function(){
+    if (graph3Partial.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.couv_dose1);
+    }else if (graph3Complete.checked == true){
+        chart3.destroy();
+        chart3 = plotVaccinationByAgeGraph("graph3",vaccinationDataAge.date,vaccinationDataAge.couv_complet);
+    }
+})
+
+graph4Partial.addEventListener('click', function(){
+    if (graph4Daily.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.n_dose1);
+    }else if (graph4Cum.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.n_cum_dose1);
+    }else if (graph4Pourcent.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.couv_dose1);
+    }
+})
+
+graph4Complete.addEventListener('click', function(){
+    if (graph4Daily.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.n_complet);
+    }else if (graph4Cum.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.n_cum_complet);
+    }else if (graph4Pourcent.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.couv_complet);
+    }
+})
+
+graph4Daily.addEventListener('click', function(){
+    if (graph4Partial.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.n_dose1);
+    }else if (graph4Complete.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.n_complet);
+    }
+})
+
+graph4Cum.addEventListener('click', function(){
+    if (graph4Partial.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.n_cum_dose1);
+    }else if (graph4Complete.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.n_cum_complet);
+    }
+})
+
+graph4Pourcent.addEventListener('click', function(){
+    if (graph4Partial.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.couv_dose1);
+    }else if (graph4Complete.checked == true){
+        chart4.destroy();
+        chart4 = plotVaccinationBySexGraph("graph4",vaccinationDataSex.date,vaccinationDataSex.couv_complet);
+    }
+})
+
+graph5FirstInj.addEventListener('click', function(){
+    if (graph5Daily.checked == true){
+        chart5.destroy();
+        chart5 = plotVaccinationByVaccinGraph("graph5",vaccinationDataVaccin.date,vaccinationDataVaccin.n_dose1);
+    }else if (graph5Cum.checked == true){
+        chart5.destroy();
+        chart5 = plotVaccinationByVaccinGraph("graph5",vaccinationDataVaccin.date,vaccinationDataVaccin.n_cum_dose1);
+    }
+})
+
+graph5SecondInj.addEventListener('click', function(){
+    if (graph5Daily.checked == true){
+        chart5.destroy();
+        chart5 = plotVaccinationByVaccinGraph("graph5",vaccinationDataVaccin.date,vaccinationDataVaccin.n_dose2);
+    }else if (graph5Cum.checked == true){
+        chart5.destroy();
+        chart5 = plotVaccinationByVaccinGraph("graph5",vaccinationDataVaccin.date,vaccinationDataVaccin.n_cum_dose2);
+    }
+})
+
+graph5Daily.addEventListener('click', function(){
+    if (graph5FirstInj.checked == true){
+        chart5.destroy();
+        chart5 = plotVaccinationByVaccinGraph("graph5",vaccinationDataVaccin.date,vaccinationDataVaccin.n_dose1);
+    }else if (graph5SecondInj.checked == true){
+        chart5.destroy();
+        chart5 = plotVaccinationByVaccinGraph("graph5",vaccinationDataVaccin.date,vaccinationDataVaccin.n_dose2);
+    }
+})
+
+graph5Cum.addEventListener('click', function(){
+    if (graph5FirstInj.checked == true){
+        chart5.destroy();
+        chart5 = plotVaccinationByVaccinGraph("graph5",vaccinationDataVaccin.date,vaccinationDataVaccin.n_cum_dose1);
+    }else if (graph5SecondInj.checked == true){
+        chart5.destroy();
+        chart5 = plotVaccinationByVaccinGraph("graph5",vaccinationDataVaccin.date,vaccinationDataVaccin.n_cum_dose2);
+    }
+})
 
 window.addEventListener('offline', function(){
     offlineMode();
@@ -347,6 +577,7 @@ searchForm.addEventListener('input', function(){
                     selectedCountry = newElt2.getAttribute("name");
                     document.getElementById("displayCountry").innerText = selectedCountry;
                     enhancedData(modalGraphsData);
+                    vaccinationDataEnabler();
                     displayAlert(responseAlerts);
                     display = displayCountryData();
                     searchForm.value = '';
@@ -538,6 +769,7 @@ function updateCountryList(distinctCountries){
             selectedCountry = newElt2.getAttribute("name");
             document.getElementById("displayCountry").innerText = selectedCountry;
             enhancedData(modalGraphsData);
+            vaccinationDataEnabler();
             displayAlert(responseAlerts);
             display = displayCountryData();
             searchForm.value = '';
@@ -715,12 +947,12 @@ function removeLoadingFromGraph(parentElement){
 
 function progressBar(){
     let value = progress.getAttribute('style').match(/\d+/g);
-    if (value <= 75){
-        let newValue = parseInt(value) + 25;
+    if (value <= 84){
+        let newValue = parseInt(value) + 14;
         progress.setAttribute("style", "width: " + newValue.toString() + "%");
         progress.setAttribute("aria-valuenow", newValue.toString());
     }
-    if (progress.getAttribute('aria-valuenow') == 100){
+    if (progress.getAttribute('aria-valuenow') >= 98){
         document.getElementsByClassName('sticky-top')[0].removeChild(document.querySelector('.sticky-top > .progress'));
     }
 }
@@ -803,26 +1035,26 @@ function updateNumbers(mydata){
         arrowDeaths = "<svg xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' fill='#F6bb43' class='bi bi-arrow-right' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z'/></svg>";
     }
     
-        document.getElementById("nbDailyCases").innerHTML = Number(cases.toString()).toLocaleString('en-UK');
-        document.getElementById('nbDailyCasesArrow').innerHTML = arrowCases;
-        document.getElementById("nbCumCases").innerHTML = Number(cumCases.toString()).toLocaleString('en-UK');
-        if (choiceDataset == dataset1.id){
-            document.getElementById('nbDailyCasesHeader').innerText = "Daily Cases";
-        } else if (choiceDataset == dataset2.id){
-            document.getElementById('nbDailyCasesHeader').innerText = "Daily Cases";
-        }
-        document.getElementById('nbCumCasesHeader').innerText = "Cumulative Cases";
-    
-    
-        document.getElementById("nbDailyDeaths").innerHTML = Number(deaths.toString()).toLocaleString('en-UK');
-        document.getElementById("nbDailyDeathsArrow").innerHTML = arrowDeaths;
-        document.getElementById("nbCumDeaths").innerHTML = Number(cumDeaths.toString()).toLocaleString('en-UK');
-        if (choiceDataset == dataset1.id){
-            document.getElementById('nbDailyDeathsHeader').innerText = "Daily Deaths";
-        } else if (choiceDataset == dataset2.id){
-            document.getElementById('nbDailyDeathsHeader').innerText = "Daily Deaths";
-        }
-        document.getElementById('nbCumDeathsHeader').innerText = "Cumulative Deaths";
+    document.getElementById("nbDailyCases").innerHTML = Number(cases.toString()).toLocaleString('en-UK');
+    document.getElementById('nbDailyCasesArrow').innerHTML = arrowCases;
+    document.getElementById("nbCumCases").innerHTML = Number(cumCases.toString()).toLocaleString('en-UK');
+    if (choiceDataset == dataset1.id){
+        document.getElementById('nbDailyCasesHeader').innerText = "Daily Cases";
+    } else if (choiceDataset == dataset2.id){
+        document.getElementById('nbDailyCasesHeader').innerText = "Daily Cases";
+    }
+    document.getElementById('nbCumCasesHeader').innerText = "Cumulative Cases";
+
+
+    document.getElementById("nbDailyDeaths").innerHTML = Number(deaths.toString()).toLocaleString('en-UK');
+    document.getElementById("nbDailyDeathsArrow").innerHTML = arrowDeaths;
+    document.getElementById("nbCumDeaths").innerHTML = Number(cumDeaths.toString()).toLocaleString('en-UK');
+    if (choiceDataset == dataset1.id){
+        document.getElementById('nbDailyDeathsHeader').innerText = "Daily Deaths";
+    } else if (choiceDataset == dataset2.id){
+        document.getElementById('nbDailyDeathsHeader').innerText = "Daily Deaths";
+    }
+    document.getElementById('nbCumDeathsHeader').innerText = "Cumulative Deaths";
 }
 
 function enhancedDataExtractor(){
@@ -988,6 +1220,241 @@ function plotModalGraph(xdata, ydata, color, name){
     return myChart
 }
 
+function vaccinByAgeDataExtractor(){
+    let vaccinByAge = {
+        date:[],
+        n_dose1: {data0:[],data04:[],data09:[],data11:[],data17:[],data24:[],data29:[],data39:[],data49:[],data59:[],data69:[],data74:[],data79:[],data80:[]},
+        n_complet: {data0:[],data04:[],data09:[],data11:[],data17:[],data24:[],data29:[],data39:[],data49:[],data59:[],data69:[],data74:[],data79:[],data80:[]},
+        n_cum_dose1: {data0:[],data04:[],data09:[],data11:[],data17:[],data24:[],data29:[],data39:[],data49:[],data59:[],data69:[],data74:[],data79:[],data80:[]},
+        n_cum_complet: {data0:[],data04:[],data09:[],data11:[],data17:[],data24:[],data29:[],data39:[],data49:[],data59:[],data69:[],data74:[],data79:[],data80:[]},
+        couv_dose1: {data0:[],data04:[],data09:[],data11:[],data17:[],data24:[],data29:[],data39:[],data49:[],data59:[],data69:[],data74:[],data79:[],data80:[]},
+        couv_complet: {data0:[],data04:[],data09:[],data11:[],data17:[],data24:[],data29:[],data39:[],data49:[],data59:[],data69:[],data74:[],data79:[],data80:[]}
+    };
+    for(let i in responseVaccinDataAge){
+        if(responseVaccinDataAge[i].clage_vacsi == "0"){
+            vaccinByAge.date.push(responseVaccinDataAge[i].jour);
+            vaccinByAge.n_dose1.data0.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data0.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data0.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data0.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data0.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data0.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "04"){
+            vaccinByAge.n_dose1.data04.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data04.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data04.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data04.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data04.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data04.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "09"){
+            vaccinByAge.n_dose1.data09.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data09.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data09.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data09.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data09.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data09.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "11"){
+            vaccinByAge.n_dose1.data11.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data11.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data11.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data11.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data11.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data11.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "17"){
+            vaccinByAge.n_dose1.data17.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data17.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data17.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data17.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data17.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data17.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "24"){
+            vaccinByAge.n_dose1.data24.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data24.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data24.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data24.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data24.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data24.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "29"){
+            vaccinByAge.n_dose1.data29.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data29.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data29.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data29.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data29.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data29.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "39"){
+            vaccinByAge.n_dose1.data39.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data39.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data39.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data39.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data39.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data39.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "49"){
+            vaccinByAge.n_dose1.data49.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data49.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data49.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data49.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data49.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data49.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "59"){
+            vaccinByAge.n_dose1.data59.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data59.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data59.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data59.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data59.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data59.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "69"){
+            vaccinByAge.n_dose1.data69.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data69.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data69.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data69.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data69.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data69.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "74"){
+            vaccinByAge.n_dose1.data74.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data74.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data74.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data74.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data74.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data74.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "79"){
+            vaccinByAge.n_dose1.data79.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data79.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data79.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data79.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data79.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data79.push(responseVaccinDataAge[i].couv_complet);
+        }else if(responseVaccinDataAge[i].clage_vacsi == "80"){
+            vaccinByAge.n_dose1.data80.push(responseVaccinDataAge[i].n_dose1);
+            vaccinByAge.n_complet.data80.push(responseVaccinDataAge[i].n_complet);
+            vaccinByAge.n_cum_dose1.data80.push(responseVaccinDataAge[i].n_cum_dose1);
+            vaccinByAge.n_cum_complet.data80.push(responseVaccinDataAge[i].n_cum_complet);
+            vaccinByAge.couv_dose1.data80.push(responseVaccinDataAge[i].couv_dose1);
+            vaccinByAge.couv_complet.data80.push(responseVaccinDataAge[i].couv_complet);
+        }
+    }
+    return vaccinByAge
+}
+
+function vaccinBySexDataExtractor(){
+    let vaccinBySex = {
+        date:[],
+        n_dose1:{data0:[],data1:[],data2:[]},
+        n_complet:{data0:[],data1:[],data2:[]},
+        n_cum_dose1:{data0:[],data1:[],data2:[]},
+        n_cum_complet:{data0:[],data1:[],data2:[]},
+        couv_dose1:{data0:[],data1:[],data2:[]},
+        couv_complet:{data0:[],data1:[],data2:[]}
+    };
+
+    for(let i in responseVaccinDataSex){
+        if(responseVaccinDataSex[i].sexe == "0"){
+            vaccinBySex.date.push(responseVaccinDataSex[i].jour);
+            vaccinBySex.n_dose1.data0.push(responseVaccinDataSex[i].n_dose1);
+            vaccinBySex.n_complet.data0.push(responseVaccinDataSex[i].n_complet);
+            vaccinBySex.n_cum_dose1.data0.push(responseVaccinDataSex[i].n_cum_dose1);
+            vaccinBySex.n_cum_complet.data0.push(responseVaccinDataSex[i].n_cum_complet);
+            vaccinBySex.couv_dose1.data0.push(responseVaccinDataSex[i].couv_dose1);
+            vaccinBySex.couv_complet.data0.push(responseVaccinDataSex[i].couv_complet);
+        }else if(responseVaccinDataSex[i].sexe == "1"){
+            vaccinBySex.n_dose1.data1.push(responseVaccinDataSex[i].n_dose1);
+            vaccinBySex.n_complet.data1.push(responseVaccinDataSex[i].n_complet);
+            vaccinBySex.n_cum_dose1.data1.push(responseVaccinDataSex[i].n_cum_dose1);
+            vaccinBySex.n_cum_complet.data1.push(responseVaccinDataSex[i].n_cum_complet);
+            vaccinBySex.couv_dose1.data1.push(responseVaccinDataSex[i].couv_dose1);
+            vaccinBySex.couv_complet.data1.push(responseVaccinDataSex[i].couv_complet);
+        }else if(responseVaccinDataSex[i].sexe == "2"){
+            vaccinBySex.n_dose1.data2.push(responseVaccinDataSex[i].n_dose1);
+            vaccinBySex.n_complet.data2.push(responseVaccinDataSex[i].n_complet);
+            vaccinBySex.n_cum_dose1.data2.push(responseVaccinDataSex[i].n_cum_dose1);
+            vaccinBySex.n_cum_complet.data2.push(responseVaccinDataSex[i].n_cum_complet);
+            vaccinBySex.couv_dose1.data2.push(responseVaccinDataSex[i].couv_dose1);
+            vaccinBySex.couv_complet.data2.push(responseVaccinDataSex[i].couv_complet);
+        }
+    }
+    return vaccinBySex
+}
+
+function vaccinByVaccinDataExtractor(){
+    let vaccinByVaccin = {
+        date:[],
+        n_dose1:{data0:[],data1:[],data2:[],data3:[],data4:[]},
+        n_dose2:{data0:[],data1:[],data2:[],data3:[],data4:[]},
+        n_cum_dose1:{data0:[],data1:[],data2:[],data3:[],data4:[]},
+        n_cum_dose2:{data0:[],data1:[],data2:[],data3:[],data4:[]},
+    };
+    for(let i in responseVaccinDataVaccin){
+        if(responseVaccinDataVaccin[i].vaccin == "0"){
+            vaccinByVaccin.date.push(responseVaccinDataVaccin[i].jour);
+            vaccinByVaccin.n_dose1.data0.push(responseVaccinDataVaccin[i].n_dose1);
+            vaccinByVaccin.n_dose2.data0.push(responseVaccinDataVaccin[i].n_dose2);
+            vaccinByVaccin.n_cum_dose1.data0.push(responseVaccinDataVaccin[i].n_cum_dose1);
+            vaccinByVaccin.n_cum_dose2.data0.push(responseVaccinDataVaccin[i].n_cum_dose2);
+        }else if(responseVaccinDataVaccin[i].vaccin == "1"){
+            vaccinByVaccin.n_dose1.data1.push(responseVaccinDataVaccin[i].n_dose1);
+            vaccinByVaccin.n_dose2.data1.push(responseVaccinDataVaccin[i].n_dose2);
+            vaccinByVaccin.n_cum_dose1.data1.push(responseVaccinDataVaccin[i].n_cum_dose1);
+            vaccinByVaccin.n_cum_dose2.data1.push(responseVaccinDataVaccin[i].n_cum_dose2);
+        }else if(responseVaccinDataVaccin[i].vaccin == "2"){
+            vaccinByVaccin.n_dose1.data2.push(responseVaccinDataVaccin[i].n_dose1);
+            vaccinByVaccin.n_dose2.data2.push(responseVaccinDataVaccin[i].n_dose2);
+            vaccinByVaccin.n_cum_dose1.data2.push(responseVaccinDataVaccin[i].n_cum_dose1);
+            vaccinByVaccin.n_cum_dose2.data2.push(responseVaccinDataVaccin[i].n_cum_dose2);
+        }else if(responseVaccinDataVaccin[i].vaccin == "3"){
+            vaccinByVaccin.n_dose1.data3.push(responseVaccinDataVaccin[i].n_dose1);
+            vaccinByVaccin.n_dose2.data3.push(responseVaccinDataVaccin[i].n_dose2);
+            vaccinByVaccin.n_cum_dose1.data3.push(responseVaccinDataVaccin[i].n_cum_dose1);
+            vaccinByVaccin.n_cum_dose2.data3.push(responseVaccinDataVaccin[i].n_cum_dose2);
+        }else if(responseVaccinDataVaccin[i].vaccin == "4"){
+            vaccinByVaccin.n_dose1.data4.push(responseVaccinDataVaccin[i].n_dose1);
+            vaccinByVaccin.n_dose2.data4.push(responseVaccinDataVaccin[i].n_dose2);
+            vaccinByVaccin.n_cum_dose1.data4.push(responseVaccinDataVaccin[i].n_cum_dose1);
+            vaccinByVaccin.n_cum_dose2.data4.push(responseVaccinDataVaccin[i].n_cum_dose2);
+        }
+    }
+    return vaccinByVaccin
+}
+
+function vaccinationData(vaccinByAge){
+    let threshold = Array(vaccinByAge.date.length).fill(70);
+    //partial vaccination
+    let partialThresholdColor;
+    if(Number(vaccinByAge.couv_dose1.data0[vaccinByAge.couv_dose1.data0.length - 1]) < 70){
+        partialThresholdColor = "#E63757";
+    }else{
+        partialThresholdColor = "#00D97E";
+    }
+    document.getElementById("partialVaccinationNumber").innerText = Number(vaccinByAge.n_cum_dose1.data0[vaccinByAge.n_cum_dose1.data0.length - 1]).toLocaleString('en-UK');
+    document.getElementById("partialVaccinationPourcent").innerText = vaccinByAge.couv_dose1.data0[vaccinByAge.couv_dose1.data0.length - 1] + " %";
+    document.getElementById("partialVaccinationNumberDate").innerText = "Last reported on " + vaccinByAge.date[vaccinByAge.date.length - 1];
+    document.getElementById("partialVaccinationPourcentDate").innerText = "Last reported on " + vaccinByAge.date[vaccinByAge.date.length - 1];
+    sparkChart5 = plotSparkGraph("partialVaccinationSparkGraph", vaccinByAge.date, vaccinByAge.couv_dose1.data0, "#2c7be5", threshold, partialThresholdColor);
+    //complete vaccination
+    if(Number(vaccinByAge.couv_complet.data0[vaccinByAge.couv_complet.data0.length - 1]) < 70){
+        completeThresholdColor = "#E63757";
+    }else{
+        completeThresholdColor = "#00D97E";
+    }
+    document.getElementById("completeVaccinationNumber").innerText = Number(vaccinByAge.n_cum_complet.data0[vaccinByAge.n_cum_complet.data0.length - 1]).toLocaleString('en-UK');
+    document.getElementById("completeVaccinationPourcent").innerText = vaccinByAge.couv_complet.data0[vaccinByAge.couv_complet.data0.length - 1] + " %";
+    document.getElementById("completeVaccinationNumberDate").innerText = "Last reported on " + vaccinByAge.date[vaccinByAge.date.length - 1]; 
+    document.getElementById("completeVaccinationPourcentDate").innerText = "Last reported on " + vaccinByAge.date[vaccinByAge.date.length - 1]; 
+    sparkChart6 = plotSparkGraph("completeVaccinationSparkGraph", vaccinByAge.date, vaccinByAge.couv_complet.data0, "#2c7be5", threshold, completeThresholdColor);   
+}
+
+function vaccinationDataEnabler(){
+    if (selectedCountry == "France" || selectedCountry == "FRA"){
+        document.getElementById('vaccinData').setAttribute("class", "");
+        document.getElementById('graph3Card').setAttribute("class", "card bg-dark text-white h-100");
+        document.getElementById('graph4Card').setAttribute("class", "card bg-dark text-white h-100");
+        document.getElementById('graph5Card').setAttribute("class", "card bg-dark text-white h-100");
+    } else {
+        document.getElementById('vaccinData').setAttribute("class", "d-none");
+        document.getElementById('graph3Card').setAttribute("class", "card bg-dark text-white h-100 d-none");
+        document.getElementById('graph4Card').setAttribute("class", "card bg-dark text-white h-100 d-none");
+        document.getElementById('graph5Card').setAttribute("class", "card bg-dark text-white h-100 d-none");
+    }
+}
+
 function statsBar(mydata){
     let end = mydata[0].length - 1;
     let cumCases = mydata[5];
@@ -1146,52 +1613,105 @@ function computeDerivative(x, index, type) {
         return x[parseInt(index)] - x[parseInt(index)-1]
 }
 
-function plotSparkGraph(chartID, xdata, ydata, color){
-    var myChart = bb.generate({
-        data: {
-            x: "x",
-            columns: [
-                ["x"].concat(xdata),
-                ["spark"].concat(ydata)
-            ],
-            type: 'area',
-            colors: {spark: color}
-        },
-        axis: {
-            x: {
-                type: "timeseries",
-                tick: {
-                    format: "%Y-%m-%d"
+function plotSparkGraph(chartID, xdata, ydata, color, threshold, thresholdcolor){
+    if(threshold && thresholdcolor){
+        var myChart = bb.generate({
+            data: {
+                x: "x",
+                columns: [
+                    ["x"].concat(xdata),
+                    ["spark"].concat(ydata),
+                    ["level"].concat(threshold)
+                ],
+                types: {spark: 'area',level: 'line'},
+                colors: {spark: color,level: thresholdcolor}
+            },
+            axis: {
+                x: {
+                    type: "timeseries",
+                    tick: {
+                        format: "%Y-%m-%d"
+                    },
+                    show: false
                 },
+                y: {
+                    show: false
+                }
+            },
+            legend: {
                 show: false
             },
-            y: {
+            tooltip: {
                 show: false
-            }
-        },
-        legend: {
-            show: false
-        },
-        tooltip: {
-            show: false
-        },
-        padding: {
-            top: 0,
-            right: 0,
-            left: 0,
-            bottom: 0
-        },
-        interaction: {
-            enabled: false
-        },
-        transition: {
-            duration: 0
-        },
-        point: {
-            show: false
-        },
-        bindto: "#" + chartID
-    });
+            },
+            padding: {
+                top: 0,
+                right: 0,
+                left: 0,
+                bottom: 0
+            },
+            interaction: {
+                enabled: false
+            },
+            transition: {
+                duration: 0
+            },
+            line: {
+                point: false,
+                classes: [
+                    "line-default",
+                    "line-dash"
+                ]
+            },
+            bindto: "#" + chartID
+        });
+    }else{
+        var myChart = bb.generate({
+            data: {
+                x: "x",
+                columns: [
+                    ["x"].concat(xdata),
+                    ["spark"].concat(ydata)
+                ],
+                type: 'area',
+                colors: {spark: color}
+            },
+            axis: {
+                x: {
+                    type: "timeseries",
+                    tick: {
+                        format: "%Y-%m-%d"
+                    },
+                    show: false
+                },
+                y: {
+                    show: false
+                }
+            },
+            legend: {
+                show: false
+            },
+            tooltip: {
+                show: false
+            },
+            padding: {
+                top: 0,
+                right: 0,
+                left: 0,
+                bottom: 0
+            },
+            interaction: {
+                enabled: false
+            },
+            transition: {
+                duration: 0
+            },
+            point: {
+                show: false
+            },
+            bindto: "#" + chartID
+        });
+    }
     return myChart
 }
 
@@ -1286,7 +1806,263 @@ function plotTimeseriesYGraph(chartID, xdata, dataObject1, legendShow, dataObjec
             bindto: "#" + chartID
         });
     }
+    return myChart
+}
 
+function plotVaccinationByAgeGraph(chartID, xdata, ydata){
+    var myChart
+    myChart = bb.generate({
+        data: {
+            x: "x",
+            columns: [
+            ["x"].concat(xdata),
+            ["age04"].concat(ydata.data04),
+            ["age59"].concat(ydata.data09),
+            ["age1011"].concat(ydata.data11),
+            ["age1217"].concat(ydata.data17),
+            ["age1824"].concat(ydata.data24),
+            ["age2529"].concat(ydata.data29),
+            ["age3039"].concat(ydata.data39),
+            ["age4049"].concat(ydata.data49),
+            ["age5059"].concat(ydata.data59),
+            ["age6069"].concat(ydata.data69),
+            ["age7074"].concat(ydata.data74),
+            ["age7579"].concat(ydata.data79),
+            ["age80plus"].concat(ydata.data80)
+            ],
+            types: {
+                age04: 'area',
+                age59: 'area',
+                age1011: 'area',
+                age1217: 'area',
+                age1824: 'area',
+                age2529: 'area',
+                age3039: 'area',
+                age4049: 'area',
+                age5059: 'area',
+                age6069: 'area',
+                age7074: 'area',
+                age7579: 'area',
+                age80plus: 'area'
+            },
+            colors: {
+                age04: '#2c7be5',
+                age59: '#39afd1',
+                age1011: '#3622F2',
+                age1217: '#2348FC',
+                age1824: '#23BBFC',
+                age2529: '#22EAF2',
+                age3039: '#315DDE',
+                age4049: '#3391E8',
+                age5059: '#1DBDAF',
+                age6069: '#756DB0',
+                age7074: '#737EBA',
+                age7579: '#73A4BA',
+                age80plus: '#AC64B1'
+            },
+            names: {
+                age04: '0-4',
+                age59: '5-9',
+                age1011: '10-11',
+                age1217: '12-17',
+                age1824: '18-24',
+                age2529: '25-29',
+                age3039: '30-39',
+                age4049: '40-49',
+                age5059: '50-59',
+                age6069: '60-69',
+                age7074: '70-74',
+                age7579: '75-79',
+                age80plus: '80+'
+            }
+        },
+        axis: {
+            x: {
+                type: "timeseries",
+                tick: {
+                    culling: {max: 5},
+                    format: "%Y-%m-%d"
+                },
+                show: false
+            },
+            y: {
+                show: false
+            }
+        },
+        legend: {
+            position: 'inset',
+            show: true
+        },
+        transition: {
+            duration: 0
+        },
+        line: {
+            point: false,
+            classes: [
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker"
+            ]
+        },
+        area: {
+            linearGradient: true
+        },
+        tooltip: {
+            grouped: true
+        },
+        bindto: "#" + chartID
+    });
+    return myChart
+}
+
+function plotVaccinationBySexGraph(chartID, xdata, ydata){
+    var myChart
+    myChart = bb.generate({
+        data: {
+            x: "x",
+            columns: [
+            ["x"].concat(xdata),
+            ["sex0"].concat(ydata.data0),
+            ["sex1"].concat(ydata.data1),
+            ["sex2"].concat(ydata.data2),
+            ],
+            types: {
+                sex0: 'area',
+                sex1: 'area',
+                sex2: 'area'
+            },
+            colors: {
+                sex0: '#2c7be5',
+                sex1: '#39afd1',
+                sex2: '#AC64B1'
+            },
+            names: {
+                sex0: 'Women, Men and Undifined',
+                sex1: 'Men',
+                sex2: 'Women'
+            }
+        },
+        axis: {
+            x: {
+                type: "timeseries",
+                tick: {
+                    culling: {max: 5},
+                    format: "%Y-%m-%d"
+                },
+                show: false
+            },
+            y: {
+                show: false
+            }
+        },
+        legend: {
+            position: 'inset',
+            show: true
+        },
+        transition: {
+            duration: 0
+        },
+        line: {
+            point: false,
+            classes: [
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker"
+            ]
+        },
+        area: {
+            linearGradient: true
+        },
+        tooltip: {
+            grouped: true
+        },
+        bindto: "#" + chartID
+    });
+    return myChart
+}
+
+function plotVaccinationByVaccinGraph(chartID, xdata, ydata){
+    var myChart
+    myChart = bb.generate({
+        data: {
+            x: "x",
+            columns: [
+            ["x"].concat(xdata),
+            ["vacc0"].concat(ydata.data0),
+            ["vacc1"].concat(ydata.data1),
+            ["vacc2"].concat(ydata.data2),
+            ["vacc3"].concat(ydata.data3),
+            ["vacc4"].concat(ydata.data4)
+            ],
+            types: {
+                vacc0: 'area',
+                vacc1: 'area',
+                vacc2: 'area',
+                vacc3: 'area',
+                vacc4: 'area'
+            },
+            colors: {
+                vacc0: '#6e84a3',
+                vacc1: '#39afd1',
+                vacc2: '#AC64B1',
+                vacc3: '#737EBA',
+                vacc4: '#23BBFC'
+            },
+            names: {
+                vacc0: 'All',
+                vacc1: 'Pfizer/BioNTech',
+                vacc2: 'Moderna',
+                vacc3: 'AstraZeneka',
+                vacc4: 'Janssen'
+            }
+        },
+        axis: {
+            x: {
+                type: "timeseries",
+                tick: {
+                    culling: {max: 5},
+                    format: "%Y-%m-%d"
+                },
+                show: false
+            },
+            y: {
+                show: false
+            }
+        },
+        legend: {
+            position: 'inset',
+            show: true
+        },
+        transition: {
+            duration: 0
+        },
+        line: {
+            point: false,
+            classes: [
+                "line-default",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker",
+                "line-slightly-thicker"
+            ]
+        },
+        area: {
+            linearGradient: true
+        },
+        tooltip: {
+            grouped: true
+        },
+        bindto: "#" + chartID
+    });
     return myChart
 }
 

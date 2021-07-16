@@ -9,7 +9,7 @@
     <!-- Custom CSS-->
     <link rel="stylesheet" href="css/add_style.css" type="text/css">
     <!-- Billboard CSS -->
-    <link rel="stylesheet" href="css/billboard.min.css" type="text/css">
+    <link rel="stylesheet" href="css/graph.min.css" type="text/css">
     <!-- Twemoji -->
     <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
     <!-- iOS Support -->
@@ -30,14 +30,16 @@
           <div class="bg-dark text-white p-4">
             <div class="container-sm">
               <h5 class="text-white h4">About</h5>
-              <h4 class="text-white"><span class="badge bg-primary navbar-brand">New</span>Fresh design and more features coming soon!</h4>
+              <h4 class="text-white"><span class="badge bg-primary navbar-brand">New</span>Vaccination data for France!</h4>
               <span class="text-white">Created by <a href="https://github.com/krusty-is-cool">krusty-is-cool</a> &#x1F60E and supported by <a href="https://github.com/raymas">raymas</a> contribution &#x1F64F.</span><br>
               <span class="text-white">This web app offers access to two major datasets of COVID-19 pandemic in countries worldwide. <br>The app is installable for a standalone use and does not use cookies &#x1F36A. Enjoy &#x1F609</span><br>
               <span class="text-white">Dataset references: </span><br>
               <span class="text-white">&#x1F449	<a href="https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data">Johns Hopkins University CSSE</a>.</span><br>
               <span class="text-white">&#x1F449	<a href="https://www.ecdc.europa.eu/en/publications-data/download-todays-data-geographic-distribution-covid-19-cases-worldwide">European Centre for Disease Prevention and Control</a>.</span><br>
               <span class="text-white">Enhanced Data &#x26A1 references: </span><br>
-              <span class="text-white">&#x1F449	France <a href="https://www.data.gouv.fr/fr/datasets/indicateurs-de-suivi-de-lepidemie-de-covid-19/">data.gouv.fr</a></span>
+              <span class="text-white">&#x1F449	France <a href="https://www.data.gouv.fr/fr/datasets/indicateurs-de-suivi-de-lepidemie-de-covid-19/">data.gouv.fr</a></span><br>
+              <span class="text-white">Vaccination Data &#x1F489 references: </span><br>
+              <span class="text-white">&#x1F449	France <a href="https://www.data.gouv.fr/fr/datasets/donnees-relatives-aux-personnes-vaccinees-contre-la-covid-19-1/">data.gouv.fr</a></span>
             </div>
           </div>
         </div>
@@ -383,6 +385,168 @@
               </div>
             </div>
           </div>
+          <div id="vaccinData">
+            <div class="row">
+              <div class="col-sm-12 col-md-6 col-xl mb-4">
+                <div class="card bg-dark text-white h-100" id="partialVaccinationNumberCard">
+                  <div class="card-body card-body-custom">
+                    <div class="row align-items-center mt-0 mb-2">
+                      <div class="col">
+                        <h6 class="text-uppercase text-muted-white mb-0 user-select-none">Partial Vaccination</h6>
+                      </div>
+                      <div class="col-auto align-self-start">
+                        <h6 class="user-select-none">&#x1F489</h6>
+                      </div>
+                    </div>
+                  </div>
+                    <div class="card-footer">
+                      <div class="row align-items-center justify-content-evenly mb-2">
+                        <div class="col">
+                          <div class="row">
+                            <span class="h2 mb-0 user-select-none" id="partialVaccinationNumber">
+                              -
+                            </span>
+                          </div>
+                          <div class="row">
+                            <small class="text-uppercase text-muted-white user-select-none" style="font-size: 0.7em">Number of people </br>vaccinated partially</small>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row align-items-end">
+                        <div class="col align-self-end">
+                          <p class="card-text mb-0 fw-light" style="font-size: 0.8em;">
+                            <small class="text-muted-white user-select-none" id="partialVaccinationNumberDate">Last reported on -</small></br>
+                          </p>
+                        </div>
+                        <div class="col-auto align-self-end">
+                          <span class="badge bg-primary">New</span>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+              </div>
+              <div class="col-sm-12 col-md-6 col-xl mb-4">
+                <div class="card bg-dark text-white h-100" id="partialVaccinationPourcentCard">
+                  <div class="card-body card-body-custom">
+                    <div class="row align-items-center mt-0 mb-2">
+                      <div class="col">
+                        <h6 class="text-uppercase text-muted-white mb-0 user-select-none">Partial Vaccination</h6>
+                      </div>
+                      <div class="col-auto align-self-start">
+                        <h6 class="user-select-none">&#x1F489</h6>
+                      </div>
+                    </div>
+                  </div> 
+                    <div class="card-footer">
+                      <div class="row align-items-center justify-content-evenly mb-2">
+                        <div class="col">
+                          <div class="row">
+                            <span class="h2 mb-0 user-select-none" id="partialVaccinationPourcent">
+                              -
+                            </span>
+                          </div>
+                          <div class="row">
+                            <small class="text-uppercase text-muted-white user-select-none" style="font-size: 0.7em">Pourcentage of </br>total population</small>
+                          </div>
+                        </div>
+                        <div class="col-auto">
+                          <div id="partialVaccinationSparkGraph" class="graph-small2"></div>
+                        </div>
+                      </div>
+                      <div class="row align-items-end">
+                        <div class="col align-self-end">
+                          <p class="card-text mb-0 fw-light" style="font-size: 0.8em;">
+                            <small class="text-muted-white user-select-none" id="partialVaccinationPourcentDate">Last reported on -</small></br>
+                          </p>
+                        </div>
+                        <div class="col-auto align-self-end">
+                          <span class="badge bg-primary">New</span>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+              </div>
+              <div class="col-sm-12 col-md-6 col-xl mb-4">
+                <div class="card bg-dark text-white h-100" id="completeVaccinationNumberCard">
+                  <div class="card-body card-body-custom">
+                    <div class="row align-items-center mt-0 mb-2">
+                      <div class="col">
+                        <h6 class="text-uppercase text-muted-white mb-0 user-select-none">Complete Vaccination</h6>
+                      </div>
+                      <div class="col-auto align-self-start">
+                        <h6 class="user-select-none">&#x1F489</h6>
+                      </div>
+                    </div>
+                  </div>
+                    <div class="card-footer">
+                      <div class="row align-items-center justify-content-evenly mb-2">
+                        <div class="col">
+                          <div class="row">
+                            <span class="h2 mb-0 user-select-none" id="completeVaccinationNumber">
+                              -
+                            </span>
+                          </div>
+                          <div class="row">
+                            <small class="text-uppercase text-muted-white user-select-none" style="font-size: 0.7em">Number of people </br>vaccinated completely</small>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row align-items-end">
+                        <div class="col align-self-end">
+                          <p class="card-text mb-0 fw-light" style="font-size: 0.8em;">
+                            <small class="text-muted-white user-select-none" id="completeVaccinationNumberDate">Last reported on -</small></br>
+                          </p>
+                        </div>
+                        <div class="col-auto align-self-end">
+                          <span class="badge bg-primary">New</span>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+              </div>
+              <div class="col-sm-12 col-md-6 col-xl mb-4">
+                <div class="card bg-dark text-white h-100" id="completeVaccinationPourcentCard">
+                  <div class="card-body card-body-custom">
+                    <div class="row align-items-center mt-0 mb-2">
+                      <div class="col">
+                        <h6 class="text-uppercase text-muted-white mb-0 user-select-none">Complete Vaccination</h6>
+                      </div>
+                      <div class="col-auto align-self-start">
+                        <h6 class="user-select-none">&#x1F489</h6>
+                      </div>
+                    </div>
+                  </div>
+                    <div class="card-footer">
+                      <div class="row align-items-center justify-content-evenly mb-2">
+                        <div class="col">
+                          <div class="row">
+                            <span class="h2 mb-0 user-select-none" id="completeVaccinationPourcent">
+                              -
+                            </span>
+                          </div>
+                          <div class="row">
+                            <small class="text-uppercase text-muted-white user-select-none" style="font-size: 0.7em">Pourcentage of </br>total population</small>
+                          </div>
+                        </div>
+                        <div class="col-auto">
+                          <div id="completeVaccinationSparkGraph" class="graph-small2"></div>
+                        </div>
+                      </div>
+                      <div class="row align-items-end">
+                        <div class="col align-self-end">
+                          <p class="card-text mb-0 fw-light" style="font-size: 0.8em;">
+                            <small class="text-muted-white user-select-none" id="completeVaccinationPourcentDate">Last reported on -</small></br>
+                          </p>
+                        </div>
+                        <div class="col-auto align-self-end">
+                          <span class="badge bg-primary">New</span>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div id="Graphs">
             <div class="row">
               <div class="col-md-12 col-lg-12 col-xl mb-4">
@@ -456,56 +620,108 @@
                 </div>
               </div>
             </div>
-            <div class="row d-none">
-              <div class="col-md-12 col-lg-12 col-xl mb-4">
-                <div class="card bg-dark text-white h-100">
+            <div class="row">
+              <div class="col-xl mb-4">
+                <div class="card bg-dark text-white h-100" id="graph3Card">
                   <div class="card-header">
                     <div class="row justify-content-end gy-1">
                       <div class="col align-self-center">
-                        <h6 class="text-uppercase mb-0 user-select-none">Stringency</h6>
+                        <h6 class="text-uppercase mb-0 user-select-none">Vaccination distributed by age</h6>
                       </div>
                       <div class="col-auto align-self-center">
                         <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
                           <input type="radio" class="btn-check" name="graph3Settings" id="graph3Settings1" autocomplete="off" checked>
-                          <label class="btn btn-outline-primary" for="graph3Settings1">Radio 1</label>
+                          <label class="btn btn-outline-primary text-white" for="graph3Settings1">Partial</label>
                         
                           <input type="radio" class="btn-check" name="graph3Settings" id="graph3Settings2" autocomplete="off">
-                          <label class="btn btn-outline-primary" for="graph3Settings2">Radio 2</label>
+                          <label class="btn btn-outline-primary text-white" for="graph3Settings2">Complete</label>
+                        </div>
+                      </div>
+                      <div class="col-auto align-self-center">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+                          <input type="radio" class="btn-check" name="graph3Settings2" id="graph3Settings3" autocomplete="off" checked>
+                          <label class="btn btn-outline-primary text-white" for="graph3Settings3">Daily</label>
                         
-                          <input type="radio" class="btn-check" name="graph3Settings" id="graph3Settings3" autocomplete="off">
-                          <label class="btn btn-outline-primary" for="graph3Settings3">Radio 3</label>
+                          <input type="radio" class="btn-check" name="graph3Settings2" id="graph3Settings4" autocomplete="off">
+                          <label class="btn btn-outline-primary text-white" for="graph3Settings4">Cum</label>
+  
+                          <input type="radio" class="btn-check" name="graph3Settings2" id="graph3Settings5" autocomplete="off">
+                          <label class="btn btn-outline-primary text-white" for="graph3Settings5">%</label>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div class="card-body">
-                    <div id="graph3"></div>
+                    <div id="graph3" class="graph"></div>
                   </div>
-                </div>
+                </div>                  
               </div>
+            </div>
+            <div class="row">
               <div class="col-md-12 col-lg-12 col-xl mb-4">
-                <div class="card bg-dark text-white h-100">
+                <div class="card bg-dark text-white h-100" id="graph4Card">
                   <div class="card-header">
                     <div class="row justify-content-end gy-1">
                       <div class="col align-self-center">
-                        <h6 class="text-uppercase mb-0 user-select-none">Policies</h6>
+                        <h6 class="text-uppercase mb-0 user-select-none">Vaccination distributed by sex</h6>
                       </div>
                       <div class="col-auto align-self-center">
                         <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
                           <input type="radio" class="btn-check" name="graph4Settings" id="graph4Settings1" autocomplete="off" checked>
-                          <label class="btn btn-outline-primary" for="graph4Settings1">Radio 1</label>
+                          <label class="btn btn-outline-primary text-white" for="graph4Settings1">Partial</label>
                         
                           <input type="radio" class="btn-check" name="graph4Settings" id="graph4Settings2" autocomplete="off">
-                          <label class="btn btn-outline-primary" for="graph4Settings2">Radio 2</label>
+                          <label class="btn btn-outline-primary text-white" for="graph4Settings2">Complete</label>
+                        </div>
+                      </div>
+                      <div class="col-auto align-self-center">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+                          <input type="radio" class="btn-check" name="graph4Settings2" id="graph4Settings3" autocomplete="off" checked>
+                          <label class="btn btn-outline-primary text-white" for="graph4Settings3">Daily</label>
                         
-                          <input type="radio" class="btn-check" name="graph4Settings" id="graph4Settings3" autocomplete="off">
-                          <label class="btn btn-outline-primary" for="graph4Settings3">Radio 3</label>
+                          <input type="radio" class="btn-check" name="graph4Settings2" id="graph4Settings4" autocomplete="off">
+                          <label class="btn btn-outline-primary text-white" for="graph4Settings4">Cum</label>
+
+                          <input type="radio" class="btn-check" name="graph4Settings2" id="graph4Settings5" autocomplete="off">
+                          <label class="btn btn-outline-primary text-white" for="graph4Settings5">%</label>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div class="card-body">
-                    <div id="graph4"></div>
+                    <div id="graph4" class="graph"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12 col-lg-12 col-xl mb-4">
+                <div class="card bg-dark text-white h-100" id="graph5Card">
+                  <div class="card-header">
+                    <div class="row justify-content-end gy-1">
+                      <div class="col align-self-center">
+                        <h6 class="text-uppercase mb-0 user-select-none">Vaccination distributed by vaccin</h6>
+                      </div>
+                      <div class="col-auto align-self-center">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+                          <input type="radio" class="btn-check" name="graph5Settings" id="graph5Settings1" autocomplete="off" checked>
+                          <label class="btn btn-outline-primary text-white" for="graph5Settings1">1st Inj.</label>
+                        
+                          <input type="radio" class="btn-check" name="graph5Settings" id="graph5Settings2" autocomplete="off">
+                          <label class="btn btn-outline-primary text-white" for="graph5Settings2">2nd Inj.</label>
+                        </div>
+                      </div>
+                      <div class="col-auto align-self-center">
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Basic radio toggle button group">
+                          <input type="radio" class="btn-check" name="graph5Settings2" id="graph5Settings3" autocomplete="off" checked>
+                          <label class="btn btn-outline-primary text-white" for="graph5Settings3">Daily</label>
+                        
+                          <input type="radio" class="btn-check" name="graph5Settings2" id="graph5Settings4" autocomplete="off">
+                          <label class="btn btn-outline-primary text-white" for="graph5Settings4">Cum</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div id="graph5" class="graph"></div>
                   </div>
                 </div>
               </div>
